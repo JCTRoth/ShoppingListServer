@@ -1,4 +1,4 @@
-namespace WebApi.Entities
+namespace ShoppingListServer.Entities
 {
     public static class Role
     {

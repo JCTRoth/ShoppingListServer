@@ -2,13 +2,13 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using WebApi.Helpers;
-using WebApi.Services;
+using ShoppingListServer.Helpers;
+using ShoppingListServer.Services;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 
-namespace WebApi
+namespace ShoppingListServer
 {
     public class Startup
     {

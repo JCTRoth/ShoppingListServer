@@ -1,10 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
-using WebApi.Services;
-using WebApi.Entities;
-using WebApi.Models;
+using ShoppingListServer.Services;
+using ShoppingListServer.Entities;
+using ShoppingListServer.Models;
 
-namespace WebApi.Controllers
+namespace ShoppingListServer.Controllers
 {
     [Authorize]
     [ApiController]
@@ -30,16 +30,24 @@ namespace WebApi.Controllers
             return Ok(user);
         }
 
+        // TO DO - Give it function
+        // Used to register users with id only or full users
         [AllowAnonymous]
         [HttpPost("register")]
         public IActionResult Register([FromBody] User user)
         {
             // UnixTime will be used as username:
             // TO DO Check if id is unique 
-
-            user.
-            if (user == null)
-                return BadRequest(new { message = "Username or password is incorrect" });
+            
+            if(user.Id == 0)
+            {
+                return BadRequest(new { message = "UserID is 0" });
+            }
+            
+            if (Helper.False_If_Empty_Or_Null(user.EMail))
+            {
+                // TO DO register user with email adress
+            }
 
             return Ok(user);
         }

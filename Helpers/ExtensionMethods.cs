@@ -1,8 +1,8 @@
 using System.Collections.Generic;
 using System.Linq;
-using WebApi.Entities;
+using ShoppingListServer.Entities;
 
-namespace WebApi.Helpers
+namespace ShoppingListServer.Helpers
 {
     public static class ExtensionMethods
     {

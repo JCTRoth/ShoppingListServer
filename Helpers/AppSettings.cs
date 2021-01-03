@@ -1,4 +1,4 @@
-namespace WebApi.Helpers
+namespace ShoppingListServer.Helpers
 {
     public class AppSettings
     {

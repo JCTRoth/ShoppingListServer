@@ -6,10 +6,10 @@ using System.Security.Claims;
 using System.Text;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
-using WebApi.Entities;
-using WebApi.Helpers;
+using ShoppingListServer.Entities;
+using ShoppingListServer.Helpers;
 
-namespace WebApi.Services
+namespace ShoppingListServer.Services
 {
     public interface IUserService
     {
