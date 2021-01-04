@@ -14,19 +14,16 @@ namespace ShoppingListServer.Services
     public interface IUserService
     {
         User Authenticate(string username, string password);
+
+        bool Add_User(User new_user);
+
         IEnumerable<User> GetAll();
-        User GetById(int id);
+
+        User GetById(string id);
     }
 
     public class UserService : IUserService
     {
-        // users hardcoded for simplicity, store in a db with hashed passwords in production applications
-        private List<User> _users = new List<User>
-        { 
-            new User { Id = 1, FirstName = "Admin", LastName = "User", Username = "admin", Password = "admin", Role = Role.Admin },
-            new User { Id = 2, FirstName = "Normal", LastName = "User", Username = "user", Password = "user", Role = Role.User } 
-        };
-
         private readonly AppSettings _appSettings;
 
         public UserService(IOptions<AppSettings> appSettings)
@@ -34,9 +31,37 @@ namespace ShoppingListServer.Services
             _appSettings = appSettings.Value;
         }
 
+        public bool Add_User(User new_user)
+        {
+            if(Tools.False_If_Empty_Or_Null(new_user.EMail))
+            {
+                if (! Tools.Is_Valid_Email(new_user.EMail))
+                {
+                    // Not Valid
+                    return false;
+                }
+            }
+
+            // Check if user in list
+            // ID
+            bool id = Program._users.Any(user => user.Id == new_user.Id);
+            // EMail
+            bool email = Program._users.Any(user => user.EMail == new_user.EMail);
+
+            if(id || email)
+            {
+                // User is already in List
+                return false; 
+            }
+
+            // Add User to list
+            Program._users.Add(new_user);
+            return true;
+        }
+
         public User Authenticate(string username, string password)
         {
-            var user = _users.SingleOrDefault(x => x.Username == username && x.Password == password);
+            var user = Program._users.SingleOrDefault(x => x.Username == username && x.Password == password);
 
             // return null if user not found
             if (user == null)
@@ -63,12 +88,12 @@ namespace ShoppingListServer.Services
 
         public IEnumerable<User> GetAll()
         {
-            return _users.WithoutPasswords();
+            return Program._users.WithoutPasswords();
         }
 
-        public User GetById(int id) 
+        public User GetById(string id) 
         {
-            var user = _users.FirstOrDefault(x => x.Id == id);
+            var user = Program._users.FirstOrDefault(x => x.Id == id);
             return user.WithoutPassword();
         }
     }

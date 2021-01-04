@@ -30,26 +30,23 @@ namespace ShoppingListServer.Controllers
             return Ok(user);
         }
 
-        // TO DO - Give it function
         // Used to register users with id only or full users
         [AllowAnonymous]
         [HttpPost("register")]
         public IActionResult Register([FromBody] User user)
         {
-            // UnixTime will be used as username:
-            // TO DO Check if id is unique 
-            
-            if(user.Id == 0)
-            {
-                return BadRequest(new { message = "UserID is 0" });
-            }
-            
-            if (Helper.False_If_Empty_Or_Null(user.EMail))
-            {
-                // TO DO register user with email adress
-            }
+            // UniqueID will be used as UserID:
+            // TO DO Check if entery is already registered
 
-            return Ok(user);
+            if (_userService.Add_User(user))
+            {
+                return Ok(user);
+            }
+            else
+            {
+                return BadRequest(new { message = "Not registered" });
+            };
+
         }
 
 
@@ -62,10 +59,11 @@ namespace ShoppingListServer.Controllers
         }
 
         [HttpGet("{id}")]
-        public IActionResult GetById(int id)
+        public IActionResult GetById(string id)
         {
             // only allow admins to access other user records
-            var currentUserId = int.Parse(User.Identity.Name);
+            var currentUserId = User.Identity.Name;
+
             if (id != currentUserId && !User.IsInRole(Role.Admin))
                 return Forbid();
 
