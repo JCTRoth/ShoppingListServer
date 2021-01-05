@@ -2,13 +2,13 @@
 using Microsoft.AspNetCore.Authorization;
 using ShoppingListServer.Services;
 using ShoppingListServer.Entities;
-using ShoppingListServer.Models;
+using Newtonsoft.Json;
 
 namespace ShoppingListServer.Controllers
 {
     [Authorize]
     [ApiController]
-    [Route("[controller]")]
+    [Route("controller")]
     public class UsersController : ControllerBase
     {
         private IUserService _userService;
@@ -20,12 +20,12 @@ namespace ShoppingListServer.Controllers
 
         [AllowAnonymous]
         [HttpPost("authenticate")]
-        public IActionResult Authenticate([FromBody]AuthenticateModel model)
+        public IActionResult Authenticate([FromBody]Authenticate model)
         {
-            var user = _userService.Authenticate(model.Username, model.Password);
+            var user = _userService.Authenticate(model.Id, model.Password);
 
             if (user == null)
-                return BadRequest(new { message = "Username or password is incorrect" });
+                return BadRequest(new { message = "Id or password is incorrect" });
 
             return Ok(user);
         }
@@ -33,14 +33,15 @@ namespace ShoppingListServer.Controllers
         // Used to register users with id only or full users
         [AllowAnonymous]
         [HttpPost("register")]
-        public IActionResult Register([FromBody] User user)
+        public IActionResult Register([FromBody] object user_json_object)
         {
-            // UniqueID will be used as UserID:
-            // TO DO Check if entery is already registered
+            User new_user = JsonConvert.DeserializeObject<User>(user_json_object.ToString());
 
-            if (_userService.Add_User(user))
+            // A Unique Id will be used as User Id:
+            // TO DO Check if entery is already registered
+            if (_userService.Add_User(new_user))
             {
-                return Ok(user);
+                return Ok(new_user);
             }
             else
             {

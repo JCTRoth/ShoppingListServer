@@ -7,7 +7,7 @@ namespace ShoppingListServer
         // Returns false if empty
         public static bool Eval_String_Boolean(string value)
         {
-            if (value != "" || value != null)
+            if (False_If_Empty_Or_Null(value))
                 return Boolean.Parse(value);
             else
                 return false;
@@ -15,7 +15,7 @@ namespace ShoppingListServer
 
         public static bool False_If_Empty_Or_Null(string value)
         {
-            if (value != "" || value != null)
+            if (value != "" && value != null)
                 return true;
             else
                 return false;

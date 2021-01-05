@@ -1,11 +1,11 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace ShoppingListServer.Models
+namespace ShoppingListServer.Entities
 {
-    public class AuthenticateModel
+    public class Authenticate
     {
         [Required]
-        public string Username { get; set; }
+        public string Id { get; set; }
 
         [Required]
         public string Password { get; set; }

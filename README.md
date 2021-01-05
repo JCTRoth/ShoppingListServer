@@ -7,4 +7,6 @@ https://github.com/danielroth1/ShoppingListApp
 
 /users/{id} - secure route restricted to authenticated users in any role, it accepts HTTP GET requests and returns the user record for the specified "id" parameter if authorization is successful. Note that "Admin" users can access all user records, while other roles (e.g. "User") can only access their own user record.
 
-/users/register/{User}
+/users/register/{User} - POST 
+
+/shopping/list/{ShoppingList} - POST
