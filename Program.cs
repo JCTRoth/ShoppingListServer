@@ -9,6 +9,8 @@ namespace ShoppingListServer
     {
         // TO DO Replace by DataBase
         public static List<User> _users = new List<User>();
+        public static List<ShoppingList> _shoppingLists = new List<ShoppingList>();
+        public static List<int> _syncIDs = new List<int>();
 
         public static void Main(string[] args)
         {
