@@ -7,7 +7,7 @@ namespace ShoppingListServer.Entities
         [Required]
         public string Id { get; set; }
 
-        [Required]
+        // Users without account should also access the api
         public string Password { get; set; }
     }
 }

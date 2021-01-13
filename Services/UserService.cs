@@ -59,9 +59,11 @@ namespace ShoppingListServer.Services
             return true;
         }
 
-        public User Authenticate(string username, string password)
+        public User Authenticate(string id, string password)
         {
-            var user = Program._users.SingleOrDefault(x => x.Username == username && x.Password == password);
+            // Users without password set will have pw null
+            // Requests without password field will have value null 
+            var user = Program._users.SingleOrDefault(x => x.Id == id && x.Password == password);
 
             // return null if user not found
             if (user == null)

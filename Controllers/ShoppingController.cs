@@ -21,7 +21,7 @@ namespace ShoppingListServer.Controllers
         [AllowAnonymous] // TO DO Change to restricted
         // [Authorize(Roles = Role.User)]
         [HttpGet("id")]
-        public IActionResult GetID([FromBody] object shoppingList_json_object)
+        public IActionResult GetID()
         {
             // TO DO 
             // Implement Queue the processes one request after another.
@@ -33,6 +33,21 @@ namespace ShoppingListServer.Controllers
             Program._syncIDs.Add(new_id);
 
             return Ok(new_id);
+        }
+
+        [AllowAnonymous] // TO DO Change to restricted
+        // [Authorize(Roles = Role.User)]
+        [HttpGet("list")]
+        public IActionResult GetList([FromBody] int syncID)
+        {
+            // TO DO Check if user is allowed
+            int index = Program._shoppingLists.FindIndex(ShoppingList => ShoppingList.SyncID == syncID);
+            if (index != -1)
+            {
+                return Ok(Program._shoppingLists.ElementAt(index));
+            }
+
+            return BadRequest(new { message = "JSON Error" });
         }
 
         [AllowAnonymous] // TO DO Change to restricted

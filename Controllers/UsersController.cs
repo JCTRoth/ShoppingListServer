@@ -8,7 +8,7 @@ namespace ShoppingListServer.Controllers
 {
     [Authorize]
     [ApiController]
-    [Route("controller")]
+    [Route("[controller]")]
     public class UsersController : ControllerBase
     {
         private IUserService _userService;
