@@ -8,6 +8,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using ShoppingListServer.Entities;
 using ShoppingListServer.Helpers;
+using ShoppingListServer.Logic;
 
 namespace ShoppingListServer.Services
 {
@@ -33,6 +34,7 @@ namespace ShoppingListServer.Services
 
         public bool Add_User(User new_user)
         {
+            // When Email adress was set, than check if valid
             if(Tools.False_If_Empty_Or_Null(new_user.EMail))
             {
                 if (! Tools.Is_Valid_Email(new_user.EMail))
@@ -55,8 +57,13 @@ namespace ShoppingListServer.Services
             }
 
             // Add User to list
-            Program._users.Add(new_user);
-            return true;
+            if (Folder.Create_User_Folder(new_user.Id))
+            {
+                Program._users.Add(new_user);
+                return true;
+            }
+
+            return false;
         }
 
         public User Authenticate(string id, string password)

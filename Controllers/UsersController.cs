@@ -11,7 +11,7 @@ namespace ShoppingListServer.Controllers
     [Route("[controller]")]
     public class UsersController : ControllerBase
     {
-        private IUserService _userService;
+        protected IUserService _userService;
 
         public UsersController(IUserService userService)
         {

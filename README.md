@@ -10,3 +10,6 @@ https://github.com/danielroth1/ShoppingListApp
 /users/register/{User} - POST 
 
 /shopping/list/{ShoppingList} - POST
+
+
+create database ShoppingAPI

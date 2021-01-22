@@ -1,9 +1,10 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System;
+using System.Linq;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using ShoppingListServer.Entities;
 using Newtonsoft.Json;
-using System;
-using System.Linq;
+using ShoppingListServer.Logic;
 
 namespace ShoppingListServer.Controllers
 {
@@ -62,6 +63,7 @@ namespace ShoppingListServer.Controllers
 
                 // TO DO Get User from Token
                 // GET TOKEN FROM REQUEST
+                // OR GET BY OWNER ID ON LIST??
                 // int pos_key = Program._users.IndexOf(User => User.Token == );
 
                 // TO DO Replace by DB
@@ -72,6 +74,12 @@ namespace ShoppingListServer.Controllers
                 {
                     // already in List
                     return BadRequest(new { message = "List was added before" });
+                }
+                else
+                {
+                    // TO DO OwnerID
+                    Program._shoppingLists.Add(new_list_item);
+                    Json_Files.Store_ShoppingList(new_list_item.OwnerID, new_list_item);
                 }
 
                 return Ok();
