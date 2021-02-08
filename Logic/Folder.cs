@@ -25,12 +25,13 @@ namespace ShoppingListServer.Logic
 
         // Creates the Data Storage Folder where JSON Shopping List's are placed in
         // After Creation set's config variable
-        public static bool Create_Data_Storage_Folder(string new_folder = "Shopping_List_Server_Data")
+        public static bool Create_Data_Storage_Folder(string new_folder = "Shopping_List_Server")
         {
             string full_path = System.IO.Path.Combine(Get_Home_Folder(), new_folder);
 
             if (Create_Folder(full_path))
             {
+                // TO DO REPLACE BY SERVICE
                 Program._data_storage_folder = full_path;
                 return true;
             }

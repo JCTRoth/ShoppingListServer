@@ -10,7 +10,7 @@ namespace ShoppingListServer.Logic
     {
         // USE SERILZED FORMAT TO STORE INFO ???
 
-        public static ShoppingList Load_ShoppingList(string user_id, string shoppingList_id)
+        public static ShoppingList Load_ShoppingList(string user_id, int shoppingList_id)
         {
             try
             {
@@ -51,6 +51,30 @@ namespace ShoppingListServer.Logic
             }
         }
 
+        public static bool Delete_ShoppingList(string user_id, int shoppingList_id)
+        {
+            try
+            {
+                string file_path = System.IO.Path.Combine(Folder.Get_User_Folder_Path(user_id),
+                                                                        shoppingList_id + ".json");
+
+                if (File.Exists(file_path))
+                {
+                    File.Delete(file_path);
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine("Delete_ShoppingList " + ex);
+                return false;
+            }
+        }
 
 
     }

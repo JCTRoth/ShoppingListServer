@@ -14,9 +14,11 @@ namespace ShoppingListServer.Services
 {
     public interface IUserService
     {
+        string GetID(); // Has no own rout
+
         User Authenticate(string username, string password);
 
-        bool Add_User(User new_user);
+        bool AddUser(User new_user);
 
         IEnumerable<User> GetAll();
 
@@ -32,9 +34,19 @@ namespace ShoppingListServer.Services
             _appSettings = appSettings.Value;
         }
 
-        public bool Add_User(User new_user)
+        public string GetID()
         {
-            // When Email adress was set, than check if valid
+            string new_id = Guid.NewGuid().ToString();
+
+            // TO DO REPLACE
+            Program._syncIDs.Add(new_id);
+
+            return new_id;
+        }
+
+        public bool AddUser(User new_user)
+        {
+            // When Email address was set, than check if valid
             if(Tools.False_If_Empty_Or_Null(new_user.EMail))
             {
                 if (! Tools.Is_Valid_Email(new_user.EMail))
@@ -79,6 +91,7 @@ namespace ShoppingListServer.Services
             // authentication successful so generate jwt token
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.ASCII.GetBytes(_appSettings.Secret);
+
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(new Claim[] 
@@ -90,6 +103,7 @@ namespace ShoppingListServer.Services
                 Expires = DateTime.UtcNow.AddDays(99999),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             };
+
             var token = tokenHandler.CreateToken(tokenDescriptor);
             user.Token = tokenHandler.WriteToken(token);
 

@@ -37,9 +37,11 @@ namespace ShoppingListServer.Controllers
         {
             User new_user = JsonConvert.DeserializeObject<User>(user_json_object.ToString());
 
+            new_user.Id = _userService.GetID();
+
             // A Unique Id will be used as User Id:
             // TO DO Check if entry is already registered
-            if (_userService.Add_User(new_user))
+            if (_userService.AddUser(new_user))
             {
                 return Ok(new_user);
             }
@@ -59,10 +61,11 @@ namespace ShoppingListServer.Controllers
             return Ok(users);
         }
 
+
         [HttpGet("{id}")]
         public IActionResult GetById(string id)
         {
-            // only allow admins to access other user records
+            // only allow admin to access other user records
             var currentUserId = User.Identity.Name;
 
             if (id != currentUserId && !User.IsInRole(Role.Admin))

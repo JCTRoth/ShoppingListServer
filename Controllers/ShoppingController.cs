@@ -1,10 +1,10 @@
 ﻿using System;
-using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using ShoppingListServer.Entities;
 using Newtonsoft.Json;
-using ShoppingListServer.Logic;
+using ShoppingListServer.Services;
+using ShoppingListServer.Models;
 
 namespace ShoppingListServer.Controllers
 {
@@ -13,8 +13,11 @@ namespace ShoppingListServer.Controllers
     [Route("[controller]")]
     public class ShoppingController : ControllerBase
     {
-        public ShoppingController()
+        protected IShoppingService _shoppingService;
+
+        public ShoppingController(IShoppingService shoppingService)
         {
+            _shoppingService = shoppingService;
         }
 
         // Returns a List ID to the App
@@ -24,16 +27,7 @@ namespace ShoppingListServer.Controllers
         [HttpGet("id")]
         public IActionResult GetID()
         {
-            // TO DO 
-            // Implement Queue the processes one request after another.
-
-            // Count 1 up
-            int highest_id = Program._syncIDs.Last();
-            int new_id = highest_id + 1;
-
-            Program._syncIDs.Add(new_id);
-
-            return Ok(new_id);
+            return Ok(_shoppingService.GetID());
         }
 
         [AllowAnonymous] // TO DO Change to restricted
@@ -41,14 +35,17 @@ namespace ShoppingListServer.Controllers
         [HttpGet("list")]
         public IActionResult GetList([FromBody] int syncID)
         {
-            // TO DO Check if user is allowed
-            int index = Program._shoppingLists.FindIndex(ShoppingList => ShoppingList.SyncID == syncID);
-            if (index != -1)
+            // TO DO GET USER ID FROM JWT
+            string fakeID = "123";
+
+            Result result = _shoppingService.GetList(fakeID, syncID);
+            
+            if (result.WasFound == true)
             {
-                return Ok(Program._shoppingLists.ElementAt(index));
+                return Ok(result.ReturnValue);
             }
 
-            return BadRequest(new { message = "JSON Error" });
+            return BadRequest(new { message = "Not Found" });
         }
 
         [AllowAnonymous] // TO DO Change to restricted
@@ -68,21 +65,15 @@ namespace ShoppingListServer.Controllers
 
                 // TO DO Replace by DB
                 // Add to list of shoppingLists
-                bool is_in_list = Program._shoppingLists.Any(ShoppingList => ShoppingList.SyncID == new_list_item.SyncID);
+                bool added = _shoppingService.AddList(new_list_item);
 
-                if (is_in_list)
+                if (added)
                 {
-                    // already in List
-                    return BadRequest(new { message = "List was added before" });
-                }
-                else
-                {
-                    // TO DO OwnerID
-                    Program._shoppingLists.Add(new_list_item);
-                    Json_Files.Store_ShoppingList(new_list_item.OwnerID, new_list_item);
+                    return Ok();
                 }
 
-                return Ok();
+                // already in List
+                return BadRequest(new { message = "List was added before" });
             }
             catch (Exception ex)
             {
@@ -104,9 +95,9 @@ namespace ShoppingListServer.Controllers
 
                 // TO DO Replace by DB
                 // Add to list of shoppingLists
-                bool is_in_list = Program._shoppingLists.Any(ShoppingList => ShoppingList.SyncID == new_list_item.SyncID);
+                bool updated = _shoppingService.UpdateList(new_list_item);
 
-                if (! is_in_list)
+                if (! updated)
                 {
                     // already in List
                     return BadRequest(new { message = "List not found" });
@@ -132,17 +123,18 @@ namespace ShoppingListServer.Controllers
         [HttpDelete("list")]
         public IActionResult DeleteList([FromBody] int del_syncID)
         {
+            // TO DO GET USER ID FROM JWT
+            string fake_id = "123";
 
             // TO DO Check if user is allowed
+            bool deleted = _shoppingService.DeleteList(fake_id, del_syncID);
 
-            int del_index = Program._shoppingLists.FindIndex(ShoppingList => ShoppingList.SyncID == del_syncID);
-            if(del_index != -1)
+            if(deleted)
             {
-                Program._shoppingLists.RemoveAt(del_index);
                 return Ok();
             }
 
-            return BadRequest(new { message = "JSON Error" });
+            return BadRequest(new { message = "JSON Error - Not Deleted" });
         }
 
     }
