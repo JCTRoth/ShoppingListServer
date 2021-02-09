@@ -22,8 +22,8 @@ namespace ShoppingListServer.Controllers
 
         // Returns a List ID to the App
         // The App can than Upload a new List with this UID
-        [AllowAnonymous] // TO DO Change to restricted
-        // [Authorize(Roles = Role.User)]
+        // [AllowAnonymous] // TO DO Change to restricted
+        [Authorize(Roles = Role.User)]
         [HttpGet("id")]
         public IActionResult GetID()
         {
@@ -36,9 +36,8 @@ namespace ShoppingListServer.Controllers
         public IActionResult GetList([FromBody] int syncID)
         {
             // TO DO GET USER ID FROM JWT
-            string fakeID = "123";
-
-            Result result = _shoppingService.GetList(fakeID, syncID);
+            string userID = HttpContext.User.Identity.Name;
+            Result result = _shoppingService.GetList(userID, syncID);
             
             if (result.WasFound == true)
             {
@@ -48,8 +47,8 @@ namespace ShoppingListServer.Controllers
             return BadRequest(new { message = "Not Found" });
         }
 
-        [AllowAnonymous] // TO DO Change to restricted
-        // [Authorize(Roles = Role.User)]
+        // [AllowAnonymous] // TO DO Change to restricted
+        [Authorize(Roles = Role.User)]
         [HttpPost("list")]
         public IActionResult AddList([FromBody] object shoppingList_json_object)
         {
@@ -57,11 +56,9 @@ namespace ShoppingListServer.Controllers
             {
                 // Convert JSON to ShoppingList Object
                 ShoppingList new_list_item = JsonConvert.DeserializeObject<ShoppingList>(shoppingList_json_object.ToString());
-
-                // TO DO Get User from Token
-                // GET TOKEN FROM REQUEST
-                // OR GET BY OWNER ID ON LIST??
-                // int pos_key = Program._users.IndexOf(User => User.Token == );
+                
+                // Dont allow other users to create a shopping list for other users
+                new_list_item.OwnerID = User.Identity.Name;
 
                 // TO DO Replace by DB
                 // Add to list of shoppingLists
@@ -124,10 +121,10 @@ namespace ShoppingListServer.Controllers
         public IActionResult DeleteList([FromBody] int del_syncID)
         {
             // TO DO GET USER ID FROM JWT
-            string fake_id = "123";
+            string userID = HttpContext.User.Identity.Name;
 
             // TO DO Check if user is allowed
-            bool deleted = _shoppingService.DeleteList(fake_id, del_syncID);
+            bool deleted = _shoppingService.DeleteList(userID, del_syncID);
 
             if(deleted)
             {

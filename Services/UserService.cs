@@ -9,6 +9,7 @@ using Microsoft.IdentityModel.Tokens;
 using ShoppingListServer.Entities;
 using ShoppingListServer.Helpers;
 using ShoppingListServer.Logic;
+using ShoppingListServer.Models;
 
 namespace ShoppingListServer.Services
 {
@@ -16,7 +17,7 @@ namespace ShoppingListServer.Services
     {
         string GetID(); // Has no own rout
 
-        User Authenticate(string username, string password);
+        User Authenticate(string id, string email, string password);
 
         bool AddUser(User new_user);
 
@@ -47,7 +48,7 @@ namespace ShoppingListServer.Services
         public bool AddUser(User new_user)
         {
             // When Email address was set, than check if valid
-            if(Tools.False_If_Empty_Or_Null(new_user.EMail))
+            if(Tools.Is_NOT_empty(new_user.EMail))
             {
                 if (! Tools.Is_Valid_Email(new_user.EMail))
                 {
@@ -78,11 +79,33 @@ namespace ShoppingListServer.Services
             return false;
         }
 
-        public User Authenticate(string id, string password)
+        public User Authenticate(string id, string email, string password)
         {
-            // Users without password set will have pw null
-            // Requests without password field will have value null 
-            var user = Program._users.SingleOrDefault(x => x.Id == id && x.Password == password);
+            var user = new User();
+
+            // Valid
+            // Id = "123", Email == null, password == null
+            // Id == null, Email == "abc@def.g", password = "123" 
+            //
+            // Invalid
+            // Email is set but no pw
+            //
+            if (Tools.Is_NOT_empty(id))
+            {
+                user = FindUser_ID(id, password);
+            }
+            else
+            {
+                if (Tools.Is_NOT_empty(email))
+                {
+                    user = FindUser_EMail(email, password);
+                }
+                else
+                {
+                    return null;
+                }
+            }
+
 
             // return null if user not found
             if (user == null)
@@ -100,14 +123,38 @@ namespace ShoppingListServer.Services
                     new Claim(ClaimTypes.Role, user.Role)
                 }),
                 // TO DO 
-                Expires = DateTime.UtcNow.AddDays(99999),
-                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+                // Expires = DateTime.UtcNow.AddDays(99999),
+                // SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             };
 
             var token = tokenHandler.CreateToken(tokenDescriptor);
             user.Token = tokenHandler.WriteToken(token);
 
             return user.WithoutPassword();
+        }
+
+        // Returns null when user not found
+        // Users without password set will have pw null
+        // Requests without password field will have value null 
+        private dynamic FindUser_ID(string id, string password)
+        {
+            var user = Program._users.SingleOrDefault(x => x.Id == id && x.Password == password);
+
+            return user;
+        }
+
+        // Returns null when user not found
+        // Email only has to have pw in request
+        private dynamic FindUser_EMail(string email, string password)
+        {
+            if(Tools.Is_NOT_empty(password))
+            {
+                return Program._users.SingleOrDefault(x => x.EMail == email && x.Password == password);
+            }
+            else
+            {
+                return false;
+            }
         }
 
         public IEnumerable<User> GetAll()

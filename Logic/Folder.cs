@@ -29,20 +29,21 @@ namespace ShoppingListServer.Logic
         {
             string full_path = System.IO.Path.Combine(Get_Home_Folder(), new_folder);
 
+            // TO DO REPLACE BY SERVICE
+            Program._data_storage_folder = full_path;
+
             if (Create_Folder(full_path))
             {
-                // TO DO REPLACE BY SERVICE
-                Program._data_storage_folder = full_path;
                 return true;
             }
 
             return false;
         }
 
-
-        // False if exist or not able to create.
+        // Returns True when folder exist after method run.
         private static bool Create_Folder(string folder_path)
         {
+
             try
             {
                 if (!System.IO.Directory.Exists(folder_path))
@@ -53,11 +54,14 @@ namespace ShoppingListServer.Logic
                     {
                         return true;
                     }
+                    else
+                    {
+                        return false;
+                    }
                 }
-                else
-                {
-                    return false;
-                }
+
+                return true;
+
             }
             catch (Exception ex)
             {

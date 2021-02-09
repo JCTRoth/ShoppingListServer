@@ -15,7 +15,7 @@ namespace ShoppingListServer.Services
 {
     public interface IShoppingService
     {
-        int GetID();
+        string GetID();
         Result GetList(string userID, int syncID);
         bool AddList(ShoppingList shoppingList);
         bool UpdateList(ShoppingList shoppingList);
@@ -33,14 +33,9 @@ namespace ShoppingListServer.Services
         }
 
 
-        public int GetID()
+        public string GetID()
         {
-            // TO DO 
-            // Implement Queue the processes one request after another.
-
-            // Count 1 up
-            int highest_id = Program._syncIDs.Last();
-            int new_id = highest_id + 1;
+            string new_id = Guid.NewGuid().ToString();
 
             // TO DO REPLACE
             Program._syncIDs.Add(new_id);
