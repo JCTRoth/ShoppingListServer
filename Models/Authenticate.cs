@@ -4,7 +4,6 @@ namespace ShoppingListServer.Entities
 {
     public class Authenticate
     {
-        [Required]
         public string Id { get; set; }
 
         public string Email { get; set; }

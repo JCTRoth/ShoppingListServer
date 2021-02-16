@@ -30,12 +30,10 @@ namespace ShoppingListServer.Controllers
             return Ok(_shoppingService.GetID());
         }
 
-        [AllowAnonymous] // TO DO Change to restricted
-        // [Authorize(Roles = Role.User)]
+        [Authorize(Roles = Role.User)]
         [HttpGet("list")]
         public IActionResult GetList([FromBody] int syncID)
         {
-            // TO DO GET USER ID FROM JWT
             string userID = HttpContext.User.Identity.Name;
             Result result = _shoppingService.GetList(userID, syncID);
             

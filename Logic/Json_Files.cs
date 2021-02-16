@@ -33,18 +33,20 @@ namespace ShoppingListServer.Logic
         {
             try
             {
-                string file_path = System.IO.Path.Combine(Folder.Get_User_Folder_Path(user_id),
-                                                                    shoppingList.SyncID + ".json");
-
+                string folder_path = Folder.Get_User_Folder_Path(user_id);
+                string file_path = System.IO.Path.Combine(folder_path, shoppingList.SyncID + ".json");
                 string list_as_string = JsonConvert.SerializeObject(shoppingList);
 
-                StreamWriter file = File.CreateText(file_path);
+                if (!System.IO.Directory.Exists(folder_path))
+                {
+                    System.IO.Directory.CreateDirectory(folder_path);
+                }
 
-                file.Write(list_as_string);
+                File.WriteAllText(file_path, list_as_string);
 
                 return true;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Console.Error.WriteLine("Store_ShoppingList " + ex);
                 return false;

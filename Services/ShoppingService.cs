@@ -84,33 +84,25 @@ namespace ShoppingListServer.Services
             else
             {
                 // TO DO OwnerID
-                Program._shoppingLists.Add(new_list_item);
-                Json_Files.Store_ShoppingList(new_list_item.OwnerID, new_list_item);
+                if(Json_Files.Store_ShoppingList(new_list_item.OwnerID, new_list_item))
+                {
+                    Program._shoppingLists.Add(new_list_item);
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
             }
 
             return true;
         }
 
 
-
         public bool UpdateList(ShoppingList new_list_item)
         {
-
-            // TO DO Replace by DB
-            // Add to list of shoppingLists
-            bool is_in_list = Program._shoppingLists.Any(ShoppingList => ShoppingList.SyncID == new_list_item.SyncID);
-
-            if (!is_in_list)
-            {
-                // already in List
-                return false;
-            }
-            else
-            {
-                // TO DO Check if user is allowed to edit list
-                // TO DO Implement UPDATE METHOD
-                return true;
-            }
+            // Identifiy command type
+            return true;
 
         }
 

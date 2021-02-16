@@ -22,7 +22,7 @@ namespace ShoppingListServer.Controllers
         [HttpPost("authenticate")]
         public IActionResult Authenticate([FromBody]Authenticate model)
         {
-            var user = _userService.Authenticate(model.Id, model.Email,model.Password);
+            var user = _userService.Authenticate(model.Id, model.Email, model.Password);
 
             if (user == null)
                 return BadRequest(new { message = "Id or password is incorrect" });
