@@ -5,6 +5,7 @@ using ShoppingListServer.Entities;
 using Newtonsoft.Json;
 using ShoppingListServer.Services;
 using ShoppingListServer.Models;
+using ShoppingListServer.Logic;
 
 namespace ShoppingListServer.Controllers
 {
@@ -22,7 +23,6 @@ namespace ShoppingListServer.Controllers
 
         // Returns a List ID to the App
         // The App can than Upload a new List with this UID
-        // [AllowAnonymous] // TO DO Change to restricted
         [Authorize(Roles = Role.User)]
         [HttpGet("id")]
         public IActionResult GetID()
@@ -36,7 +36,7 @@ namespace ShoppingListServer.Controllers
         {
             string userID = HttpContext.User.Identity.Name;
             Result result = _shoppingService.GetList(userID, syncID);
-            
+
             if (result.WasFound == true)
             {
                 return Ok(result.ReturnValue);
@@ -54,7 +54,7 @@ namespace ShoppingListServer.Controllers
             {
                 // Convert JSON to ShoppingList Object
                 ShoppingList new_list_item = JsonConvert.DeserializeObject<ShoppingList>(shoppingList_json_object.ToString());
-                
+
                 // Dont allow other users to create a shopping list for other users
                 new_list_item.OwnerID = User.Identity.Name;
 
@@ -81,50 +81,70 @@ namespace ShoppingListServer.Controllers
         [AllowAnonymous] // TO DO Change to restricted
         // [Authorize(Roles = Role.User)]
         [HttpPatch("list")]
-        public IActionResult UpdateList([FromBody] object shoppingList_json_object)
+        public IActionResult UpdateList([FromBody] object update_request_json)
         {
             try
             {
                 // Convert JSON to ShoppingList Object
-                ShoppingList new_list_item = JsonConvert.DeserializeObject<ShoppingList>(shoppingList_json_object.ToString());
+                Updatelist_Request updatelist_command = JsonConvert.DeserializeObject<Updatelist_Request>(update_request_json.ToString());
 
-                // TO DO Replace by DB
-                // Add to list of shoppingLists
-                bool updated = _shoppingService.UpdateList(new_list_item);
+                Result result = _shoppingService.GetList(User.Identity.Name, updatelist_command.SyncID);
 
-                if (! updated)
+                if (result.WasFound)
                 {
-                    // already in List
-                    return BadRequest(new { message = "List not found" });
+                    ShoppingList shoppingList = result.ReturnValue;
+
+                    if (User_Access.Is_User_Allowed_To_Edit(User.Identity.Name, shoppingList))
+                    {
+                        // Add to list of shoppingLists
+                        bool updated = _shoppingService.UpdateList(updatelist_command, shoppingList);
+
+                        if (!updated)
+                        {
+                            // already in List
+                            return BadRequest(new { message = "Command Error " + update_request_json.ToString() });
+                        }
+                        else
+                        {
+                            // TO DO Check if user is allowed to edit list
+                            if (_shoppingService.UpdateList(updatelist_command, shoppingList))
+                            {
+                                return Ok();
+                            }
+                            else
+                            {
+                                return BadRequest(new { message = "Not Updated" });
+                            };
+                        }
+                    }
+                    else
+                    {
+                        return BadRequest(new { message = "No access to update" });
+                    }
+
                 }
                 else
                 {
-                    // TO DO Check if user is allowed to edit list
-                    // TO DO Implement UPDATE METHOD
-                    return Ok(new { message = "Not Implemented!" });
+                    return BadRequest(new { message = "No List to update" });
                 }
-
             }
             catch (Exception ex)
             {
                 Console.Error.WriteLine("UpdateList " + ex);
                 return BadRequest(new { message = "JSON Error" });
             }
-
         }
 
-        [AllowAnonymous] // TO DO Change to restricted
-        // [Authorize(Roles = Role.User)]
+        [Authorize(Roles = Role.User)]
         [HttpDelete("list")]
         public IActionResult DeleteList([FromBody] int del_syncID)
         {
-            // TO DO GET USER ID FROM JWT
             string userID = HttpContext.User.Identity.Name;
 
             // TO DO Check if user is allowed
             bool deleted = _shoppingService.DeleteList(userID, del_syncID);
 
-            if(deleted)
+            if (deleted)
             {
                 return Ok();
             }

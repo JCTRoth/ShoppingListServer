@@ -3,6 +3,9 @@ namespace ShoppingListServer.Entities
     // Commands applied on a shoppinglist
     public class Updatelist_Request
     {
+        // SyncID of List
+        public int SyncID { get; set; }
+
         // Add, Remove, Update
         public string Command_Type { get; set; }
 

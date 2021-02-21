@@ -1,11 +1,6 @@
 using System;
-using System.Collections.Generic;
-using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
-using System.Security.Claims;
-using System.Text;
 using Microsoft.Extensions.Options;
-using Microsoft.IdentityModel.Tokens;
 using ShoppingListServer.Entities;
 using ShoppingListServer.Helpers;
 using ShoppingListServer.Logic;
@@ -18,7 +13,7 @@ namespace ShoppingListServer.Services
         string GetID();
         Result GetList(string userID, int syncID);
         bool AddList(ShoppingList shoppingList);
-        bool UpdateList(ShoppingList shoppingList);
+        bool UpdateList(Updatelist_Request update_request, ShoppingList shoppingList);
         bool DeleteList(string userID, int del_syncID);
 
     }
@@ -66,12 +61,6 @@ namespace ShoppingListServer.Services
 
         public bool AddList(ShoppingList new_list_item)
         {
-
-            // TO DO Get User from Token
-            // GET TOKEN FROM REQUEST
-            // OR GET BY OWNER ID ON LIST??
-            // int pos_key = Program._users.IndexOf(User => User.Token == );
-
             // TO DO Replace by DB
             // Add to list of shoppingLists
             bool is_in_list = Program._shoppingLists.Any(ShoppingList => ShoppingList.SyncID == new_list_item.SyncID);
@@ -84,7 +73,7 @@ namespace ShoppingListServer.Services
             else
             {
                 // TO DO OwnerID
-                if(Json_Files.Store_ShoppingList(new_list_item.OwnerID, new_list_item))
+                if (Json_Files.Store_ShoppingList(new_list_item.OwnerID, new_list_item))
                 {
                     Program._shoppingLists.Add(new_list_item);
                     return true;
@@ -94,19 +83,35 @@ namespace ShoppingListServer.Services
                     return false;
                 }
             }
-
-            return true;
         }
 
-
-        public bool UpdateList(ShoppingList new_list_item)
+        public bool UpdateList(Updatelist_Request update_request, ShoppingList shoppingList)
         {
-            // Identifiy command type
+            // TO DO Check if user is allowed
+
+            // Identify command type
+            switch (update_request.Command_Type)
+            {
+                case Updatelist_Command_Type.Add:
+                    // TO DO
+                    break;
+                case Updatelist_Command_Type.Remove:
+                    // TO DO
+                    break;
+                case Updatelist_Command_Type.Update:
+                    // TO DO
+                    break;
+                default:
+                    Console.Error.WriteLine("UpdateList Switch Case Not Matched" +
+                                                update_request.Command_Type);
+                    return false;
+            }
+
             return true;
 
         }
 
-        public bool DeleteList(string userID,int del_syncID)
+        public bool DeleteList(string userID, int del_syncID)
         {
             // TO DO Check if user is allowed
 

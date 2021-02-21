@@ -8,7 +8,7 @@ namespace ShoppingListServer.Logic
 {
     public class Json_Files
     {
-        // USE SERILZED FORMAT TO STORE INFO ???
+        // TO DO USER fastJSON
 
         public static ShoppingList Load_ShoppingList(string user_id, int shoppingList_id)
         {
