@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using ShoppingListServer.Entities;
+﻿using ShoppingListServer.Entities;
 
 namespace ShoppingListServer.Logic
 {
@@ -9,9 +6,21 @@ namespace ShoppingListServer.Logic
     {
         public static bool Is_User_Allowed_To_Edit(string userID, ShoppingList shoppingList)
         {
-            // TO DO
+            if(shoppingList.OwnerID == userID)
+            {
+                return true;
+            }
 
-            return true;
+            foreach(string id in shoppingList.AcessIDs)
+            {
+                if (id == userID)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
     }
+
 }

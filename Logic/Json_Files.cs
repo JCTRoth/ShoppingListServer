@@ -53,6 +53,35 @@ namespace ShoppingListServer.Logic
             }
         }
 
+        public static bool Update_ShoppingList(string user_id, ShoppingList shoppingList)
+        {
+            try
+            {
+                string folder_path = Folder.Get_User_Folder_Path(user_id);
+                string file_path = System.IO.Path.Combine(folder_path, shoppingList.SyncID + ".json");
+                string list_as_string = JsonConvert.SerializeObject(shoppingList);
+
+                if (!System.IO.Directory.Exists(folder_path))
+                {
+                    return false;
+                }
+
+                if (!System.IO.File.Exists(folder_path))
+                {
+                    return false;
+                }
+
+                File.WriteAllText(file_path, list_as_string);
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine("Update_ShoppingList " + ex);
+                return false;
+            }
+        }
+
         public static bool Delete_ShoppingList(string user_id, int shoppingList_id)
         {
             try

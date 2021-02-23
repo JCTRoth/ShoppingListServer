@@ -13,9 +13,10 @@ namespace ShoppingListServer.Services
         string GetID();
         Result GetList(string userID, int syncID);
         bool AddList(ShoppingList shoppingList);
-        bool UpdateList(Updatelist_Request update_request, ShoppingList shoppingList);
+        bool Update_Item_In_List(string name_of_old_item, Item Old_Item, ShoppingList shoppingList);
+        bool Remove_Item_In_List(string name_of_old_item, ShoppingList shoppingList);
+        bool Add_Item_To_List(Item new_item, ShoppingList shoppingList);
         bool DeleteList(string userID, int del_syncID);
-
     }
 
     public class ShoppingService : IShoppingService
@@ -85,31 +86,7 @@ namespace ShoppingListServer.Services
             }
         }
 
-        public bool UpdateList(Updatelist_Request update_request, ShoppingList shoppingList)
-        {
-            // TO DO Check if user is allowed
 
-            // Identify command type
-            switch (update_request.Command_Type)
-            {
-                case Updatelist_Command_Type.Add:
-                    // TO DO
-                    break;
-                case Updatelist_Command_Type.Remove:
-                    // TO DO
-                    break;
-                case Updatelist_Command_Type.Update:
-                    // TO DO
-                    break;
-                default:
-                    Console.Error.WriteLine("UpdateList Switch Case Not Matched" +
-                                                update_request.Command_Type);
-                    return false;
-            }
-
-            return true;
-
-        }
 
         public bool DeleteList(string userID, int del_syncID)
         {
@@ -127,6 +104,34 @@ namespace ShoppingListServer.Services
             }
 
             return false;
+        }
+
+        public bool Update_Item_In_List(string name_of_old_item, Item New_Item, ShoppingList shoppingList)
+        {
+            // Names in ShoppingLists are Unique
+            for (int i = 0; i < shoppingList.ProductList.Count; i++)
+            {
+                if (shoppingList.ProductList[i].GenericItem.Name == name_of_old_item)
+                {
+                    shoppingList.ProductList[i] = New_Item;
+                    Json_Files.Update_ShoppingList(shoppingList.OwnerID, shoppingList);
+                    return true;
+                }
+            }
+            
+            return false;
+        }
+
+        public bool Remove_Item_In_List(string name_of_old_item, ShoppingList shoppingList)
+        {
+            // TO DO
+            return true;
+        }
+
+        public bool Add_Item_To_List(Item new_item, ShoppingList shoppingList)
+        {
+            // TO DO
+            return true;
         }
     }
 }

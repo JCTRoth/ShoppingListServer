@@ -15,8 +15,6 @@ namespace ShoppingListServer.Services
 {
     public interface IUserService
     {
-        string GetID(); // Has no own rout
-
         User Authenticate(string id, string email, string password);
 
         bool AddUser(User new_user);
@@ -35,15 +33,6 @@ namespace ShoppingListServer.Services
             _appSettings = appSettings.Value;
         }
 
-        public string GetID()
-        {
-            string new_id = Guid.NewGuid().ToString();
-
-            // TO DO REPLACE
-            Program._syncIDs.Add(new_id);
-
-            return new_id;
-        }
 
         public bool AddUser(User new_user)
         {

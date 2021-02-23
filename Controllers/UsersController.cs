@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using ShoppingListServer.Services;
 using ShoppingListServer.Entities;
@@ -37,7 +38,7 @@ namespace ShoppingListServer.Controllers
         {
             User new_user = JsonConvert.DeserializeObject<User>(user_json_object.ToString());
 
-            new_user.Id = _userService.GetID();
+            new_user.Id = Guid.NewGuid().ToString();
 
             // A Unique Id will be used as User Id:
             // TO DO Check if entry is already registered

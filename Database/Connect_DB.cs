@@ -6,6 +6,11 @@ namespace ShoppingListServer.Database
 {
     public class Connect_DB
     {
+            // DB Entery
+            // SyncID, UserID, AcessType
+            // string,string,int
+
+
             /* Connect_DB()
             {
                 var cs = @"Server=localhost\ShoppingAPI;Database=testdb;Trusted_Connection=True;";

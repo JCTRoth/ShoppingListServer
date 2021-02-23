@@ -1,8 +1,8 @@
 ﻿using System;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
-using ShoppingListServer.Entities;
 using Newtonsoft.Json;
+using ShoppingListServer.Entities;
 using ShoppingListServer.Services;
 using ShoppingListServer.Models;
 using ShoppingListServer.Logic;
@@ -55,7 +55,7 @@ namespace ShoppingListServer.Controllers
                 // Convert JSON to ShoppingList Object
                 ShoppingList new_list_item = JsonConvert.DeserializeObject<ShoppingList>(shoppingList_json_object.ToString());
 
-                // Dont allow other users to create a shopping list for other users
+                // Don't allow other users to create a shopping list for other users
                 new_list_item.OwnerID = User.Identity.Name;
 
                 // TO DO Replace by DB
@@ -78,63 +78,6 @@ namespace ShoppingListServer.Controllers
 
         }
 
-        [AllowAnonymous] // TO DO Change to restricted
-        // [Authorize(Roles = Role.User)]
-        [HttpPatch("list")]
-        public IActionResult UpdateList([FromBody] object update_request_json)
-        {
-            try
-            {
-                // Convert JSON to ShoppingList Object
-                Updatelist_Request updatelist_command = JsonConvert.DeserializeObject<Updatelist_Request>(update_request_json.ToString());
-
-                Result result = _shoppingService.GetList(User.Identity.Name, updatelist_command.SyncID);
-
-                if (result.WasFound)
-                {
-                    ShoppingList shoppingList = result.ReturnValue;
-
-                    if (User_Access.Is_User_Allowed_To_Edit(User.Identity.Name, shoppingList))
-                    {
-                        // Add to list of shoppingLists
-                        bool updated = _shoppingService.UpdateList(updatelist_command, shoppingList);
-
-                        if (!updated)
-                        {
-                            // already in List
-                            return BadRequest(new { message = "Command Error " + update_request_json.ToString() });
-                        }
-                        else
-                        {
-                            // TO DO Check if user is allowed to edit list
-                            if (_shoppingService.UpdateList(updatelist_command, shoppingList))
-                            {
-                                return Ok();
-                            }
-                            else
-                            {
-                                return BadRequest(new { message = "Not Updated" });
-                            };
-                        }
-                    }
-                    else
-                    {
-                        return BadRequest(new { message = "No access to update" });
-                    }
-
-                }
-                else
-                {
-                    return BadRequest(new { message = "No List to update" });
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.Error.WriteLine("UpdateList " + ex);
-                return BadRequest(new { message = "JSON Error" });
-            }
-        }
-
         [Authorize(Roles = Role.User)]
         [HttpDelete("list")]
         public IActionResult DeleteList([FromBody] int del_syncID)
@@ -150,6 +93,84 @@ namespace ShoppingListServer.Controllers
             }
 
             return BadRequest(new { message = "JSON Error - Not Deleted" });
+        }
+
+        //
+        // TO DO ADDITEM IS MISSING
+        //
+
+        [AllowAnonymous] // TO DO Change to restricted
+        // [Authorize(Roles = Role.User)]
+        [HttpPatch("listupdate")]
+        public IActionResult Update_Item_In_List([FromBody] object update_request_json)
+        {
+            try
+            {
+                // Convert JSON to ShoppingList Object
+                Update_Item updatelist_command = JsonConvert.DeserializeObject<Update_Item>(update_request_json.ToString());
+
+                Result result = _shoppingService.GetList(User.Identity.Name, updatelist_command.SyncID);
+
+                if (result.WasFound)
+                {
+
+                    // Add to list of shoppingLists
+                    bool updated = _shoppingService.Update_Item_In_List(updatelist_command.OldItemName,
+                                                                        updatelist_command.NewItem,
+                                                                        result.ReturnValue);
+
+                    if (!updated)
+                    {
+                        // already in List
+                        return BadRequest(new { message = "List not updated " + update_request_json.ToString() });
+                    }
+
+                    return Ok();
+                }
+
+                return BadRequest(new { message = "List not found" });
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine("Update_Item_In_List " + ex);
+                return BadRequest(new { message = "JSON Error" });
+            }
+        }
+
+        [AllowAnonymous] // TO DO Change to restricted
+        // [Authorize(Roles = Role.User)]
+        [HttpDelete("listupdate")]
+        public IActionResult Remove_Item_In_List([FromBody] object update_request_json)
+        {
+            try
+            {
+                // Convert JSON to ShoppingList Object
+                Remove_Item updatelist_command = JsonConvert.DeserializeObject<Remove_Item>(update_request_json.ToString());
+
+                Result result = _shoppingService.GetList(User.Identity.Name, updatelist_command.SyncID);
+
+                if (result.WasFound)
+                {
+
+                    // Add to list of shoppingLists
+                    bool updated = _shoppingService.Remove_Item_In_List(updatelist_command.ItemName, result.ReturnValue);
+
+                    if (!updated)
+                    {
+                        // already in List
+                        return BadRequest(new { message = "List not updated " + update_request_json.ToString() });
+                    }
+
+                    return Ok();
+                }
+
+                return BadRequest(new { message = "List not found" });
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine("Remove_Item_In_List " + ex);
+                return BadRequest(new { message = "JSON Error" });
+            }
         }
 
     }
