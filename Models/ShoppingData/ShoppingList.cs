@@ -16,10 +16,8 @@ namespace ShoppingListServer.Entities
 
         public List<Item> ProductList { get; set; }
 
-        [JsonIgnore]
         public string OwnerID { get; set; }
         
-        [JsonIgnore]
         public List<String> AcessIDs { get; set; }
     }
 }

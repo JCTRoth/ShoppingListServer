@@ -66,7 +66,7 @@ namespace ShoppingListServer.Logic
                     return false;
                 }
 
-                if (!System.IO.File.Exists(folder_path))
+                if (!System.IO.File.Exists(file_path))
                 {
                     return false;
                 }

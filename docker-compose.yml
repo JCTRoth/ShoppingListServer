@@ -1,0 +1,8 @@
+version: '3.4'
+
+services:
+  downloadnewspaper:
+    image: downloadnewspaper
+    build:
+      context: .
+      dockerfile: ./Dockerfile

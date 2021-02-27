@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace ShoppingListServer.Models
+﻿namespace ShoppingListServer.Models
 {
     // Return Value of API Functions
     // e.g. ShopingList was not found than WasFound == false
