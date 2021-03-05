@@ -7,6 +7,8 @@ RUN dotnet restore
 COPY . ./
 RUN dotnet publish -c Release -o out
 
+EXPOSE 5000
+
 FROM mcr.microsoft.com/dotnet/aspnet:3.1
 COPY --from=build-env /app/out .
-ENTRYPOINT ["dotnet", "ShoppingListServer.dll"]
+CMD ["dotnet", "ShoppingListServer.dll", "--server.urls", "http://0.0.0.0:5000"]
