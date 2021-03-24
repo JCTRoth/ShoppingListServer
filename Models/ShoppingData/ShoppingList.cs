@@ -10,7 +10,7 @@ namespace ShoppingListServer.Entities
 
         // Unique Identity of the ShoppingList
         // App pulls the SyncID from the Server.
-        public int SyncID { get; set; }
+        public string SyncID { get; set; }
 
         public string Category { get; set; }
 

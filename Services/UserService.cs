@@ -112,7 +112,7 @@ namespace ShoppingListServer.Services
                     new Claim(ClaimTypes.Email, user.EMail),
                     new Claim(ClaimTypes.Role, user.Role)
                 }),
-                // TO DO 
+                // TODO 
                 // Expires = DateTime.UtcNow.AddDays(99999),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             };

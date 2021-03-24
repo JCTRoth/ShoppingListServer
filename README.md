@@ -12,5 +12,5 @@ https://github.com/danielroth1/ShoppingListApp
 /shopping/list/{ShoppingList} - POST
 
 ```bash
-docker container run -d --name 'shopping-list' -p 5000:5000 sha256:6ecc3a5e1f501e6c2ea374176fd3e9f469eebae8ed6355818cd1393eb8fdd994
+docker container run -d --name 'shopping-list' -p 5678:5678 sha256:6ecc3a5e1f501e6c2ea374176fd3e9f469eebae8ed6355818cd1393eb8fdd994
 ```

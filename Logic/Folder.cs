@@ -7,7 +7,7 @@ namespace ShoppingListServer.Logic
 
         public static string Get_User_Folder_Path(string user_id)
         {   
-            // TO DO Replace by config
+            // TODO Replace by injected config
             string main_folder = Program._data_storage_folder;
             
             return System.IO.Path.Combine(main_folder, user_id);

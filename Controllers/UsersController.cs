@@ -54,6 +54,7 @@ namespace ShoppingListServer.Controllers
         }
 
 
+        /*
         [Authorize(Roles = Role.Admin)]
         [HttpGet]
         public IActionResult GetAll()
@@ -61,6 +62,7 @@ namespace ShoppingListServer.Controllers
             var users =  _userService.GetAll();
             return Ok(users);
         }
+        */
 
 
         [HttpGet("{id}")]

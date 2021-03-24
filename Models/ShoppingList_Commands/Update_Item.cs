@@ -5,7 +5,7 @@ namespace ShoppingListServer.Models
     class Update_Item
     {
         // SyncID of List
-        public int SyncID { get; set; }
+        public string SyncID { get; set; }
 
         public string OldItemName { get; set; }
 

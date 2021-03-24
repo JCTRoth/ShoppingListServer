@@ -19,7 +19,6 @@ namespace ShoppingListServer.Services
 
         // Result GetList(string userID, int syncID);
 
-
     }
 
     public class LoggingService : ILoggingService

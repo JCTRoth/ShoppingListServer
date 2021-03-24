@@ -8,9 +8,14 @@ namespace ShoppingListServer.Logic
 {
     public class Json_Files
     {
-        // TO DO USER fastJSON
+        // TODO USER fastJSON
 
-        public static ShoppingList Load_ShoppingList(string user_id, int shoppingList_id)
+        public Json_Files()
+        {
+
+        }
+
+        public ShoppingList Load_ShoppingList(string user_id, string shoppingList_id)
         {
             try
             {
@@ -29,7 +34,7 @@ namespace ShoppingListServer.Logic
             }
         }
 
-        public static bool Store_ShoppingList(string user_id, ShoppingList shoppingList)
+        public bool Store_ShoppingList(string user_id, ShoppingList shoppingList)
         {
             try
             {
@@ -53,7 +58,7 @@ namespace ShoppingListServer.Logic
             }
         }
 
-        public static bool Update_ShoppingList(string user_id, ShoppingList shoppingList)
+        public bool Update_ShoppingList(string user_id, ShoppingList shoppingList)
         {
             try
             {
@@ -82,7 +87,7 @@ namespace ShoppingListServer.Logic
             }
         }
 
-        public static bool Delete_ShoppingList(string user_id, int shoppingList_id)
+        public bool Delete_ShoppingList(string user_id, string shoppingList_id)
         {
             try
             {

@@ -15,10 +15,12 @@ namespace ShoppingListServer.Controllers
     public class ShoppingController : ControllerBase
     {
         protected IShoppingService _shoppingService;
+        protected User_Access _user_access;
 
         public ShoppingController(IShoppingService shoppingService)
         {
             _shoppingService = shoppingService;
+            _user_access = new User_Access();
         }
 
         // Returns a List ID to the App
@@ -32,17 +34,25 @@ namespace ShoppingListServer.Controllers
 
         [Authorize(Roles = Role.User)]
         [HttpGet("list")]
-        public IActionResult GetList([FromBody] int syncID)
+        public IActionResult GetList([FromBody] string syncID)
         {
-            string userID = HttpContext.User.Identity.Name;
-            Result result = _shoppingService.GetList(userID, syncID);
-
-            if (result.WasFound == true)
+            try
             {
-                return Ok(result.ReturnValue);
-            }
+                string userID = HttpContext.User.Identity.Name;
+                Result result = _shoppingService.GetList(userID, syncID);
 
-            return BadRequest(new { message = "Not Found" });
+                if (result.WasFound == true)
+                {
+                    return Ok(result.ReturnValue);
+                }
+
+                return BadRequest(new { message = "Not Found" });
+            }
+            catch
+            {
+                Console.Error.WriteLine("GetList " + HttpContext.Request.Body.ToString());
+                return BadRequest(new { message = "JSON Error" });
+            }
         }
 
         // [AllowAnonymous] // TO DO Change to restricted
@@ -80,7 +90,7 @@ namespace ShoppingListServer.Controllers
 
         [Authorize(Roles = Role.User)]
         [HttpDelete("list")]
-        public IActionResult DeleteList([FromBody] int del_syncID)
+        public IActionResult DeleteList([FromBody] string del_syncID)
         {
             string userID = HttpContext.User.Identity.Name;
 
@@ -96,16 +106,17 @@ namespace ShoppingListServer.Controllers
         }
 
         //
-        // TO DO ADDITEM IS MISSING
+        // TODO ADDITEM IS MISSING
         //
 
-        [AllowAnonymous] // TO DO Change to restricted
+        [AllowAnonymous] // TODO Change to restricted
         // [Authorize(Roles = Role.User)]
         [HttpPatch("listupdate")]
         public IActionResult Update_Item_In_List([FromBody] object update_request_json)
         {
             try
             {
+
                 // Convert JSON to ShoppingList Object
                 Update_Item updatelist_command = JsonConvert.DeserializeObject<Update_Item>(update_request_json.ToString());
 
@@ -113,19 +124,22 @@ namespace ShoppingListServer.Controllers
 
                 if (result.WasFound)
                 {
-
-                    // Add to list of shoppingLists
-                    bool updated = _shoppingService.Update_Item_In_List(updatelist_command.OldItemName,
-                                                                        updatelist_command.NewItem,
-                                                                        result.ReturnValue);
-
-                    if (!updated)
+                    if (_user_access.Is_User_Allowed_To_Edit(User.Identity.Name, result.ReturnValue))
                     {
-                        // already in List
-                        return BadRequest(new { message = "List not updated " + update_request_json.ToString() });
+                        // Add to list of shoppingLists
+                        bool updated = _shoppingService.Update_Item_In_List(updatelist_command.OldItemName,
+                                                                            updatelist_command.NewItem,
+                                                                            result.ReturnValue);
+
+                        if (!updated)
+                        {
+                            // already in List
+                            return BadRequest(new { message = "List not updated " + update_request_json.ToString() });
+                        }
+
+                        return Ok();
                     }
 
-                    return Ok();
                 }
 
                 return BadRequest(new { message = "List not found" });
@@ -137,8 +151,7 @@ namespace ShoppingListServer.Controllers
             }
         }
 
-        [AllowAnonymous] // TO DO Change to restricted
-        // [Authorize(Roles = Role.User)]
+        [Authorize(Roles = Role.User)]
         [HttpDelete("listupdate")]
         public IActionResult Remove_Item_In_List([FromBody] object update_request_json)
         {
@@ -151,17 +164,20 @@ namespace ShoppingListServer.Controllers
 
                 if (result.WasFound)
                 {
-
-                    // Add to list of shoppingLists
-                    bool updated = _shoppingService.Remove_Item_In_List(updatelist_command.ItemName, result.ReturnValue);
-
-                    if (!updated)
+                    if (_user_access.Is_User_Allowed_To_Edit(User.Identity.Name, result.ReturnValue))
                     {
-                        // already in List
-                        return BadRequest(new { message = "List not updated " + update_request_json.ToString() });
+                        // Add to list of shoppingLists
+                        bool updated = _shoppingService.Remove_Item_In_List(updatelist_command.ItemName, result.ReturnValue);
+
+                        if (!updated)
+                        {
+                            // already in List
+                            return BadRequest(new { message = "List not updated " + update_request_json.ToString() });
+                        }
+
+                        return Ok();
                     }
 
-                    return Ok();
                 }
 
                 return BadRequest(new { message = "List not found" });
