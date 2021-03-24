@@ -6,69 +6,6 @@
 	},
 	"item": [
 		{
-			"name": "Update_Shoppinglist",
-			"item": [
-				{
-					"name": "Update",
-					"protocolProfileBehavior": {
-						"disabledSystemHeaders": {
-							"connection": true,
-							"accept-encoding": true
-						}
-					},
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6IjIiLCJlbWFpbCI6InVzZXJAbWFpbGJhc2UuaW5mbyIsInJvbGUiOiJVc2VyIiwibmJmIjoxNjE0MDE0MzI0LCJleHAiOjE2MTQwMTc5MjQsImlhdCI6MTYxNDAxNDMyNH0.FCLnqI7u6XAAQVrDTf4LGrEVnuKGPW1c3HwvlkL3gkQ",
-									"type": "string"
-								}
-							]
-						},
-						"method": "PATCH",
-						"header": [
-							{
-								"key": "Accept-Encoding",
-								"value": "application/json",
-								"type": "text",
-								"disabled": true
-							},
-							{
-								"key": "Access-Control-Allow-Origin",
-								"value": "*",
-								"type": "text",
-								"disabled": true
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\"SyncID\":0,\r\n\"Sprite\",\r\n{\"Item\":{\"Name\":\"Nudeln\",\"ImagePath\":null,\"Category\":{\"Name\":\"Andere\"}},\"Count\":1,\"Checked\":false}}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "http://localhost:4000/shopping/listupdate",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "4000",
-							"path": [
-								"shopping",
-								"listupdate"
-							]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
 			"name": "Add shoppinglist",
 			"protocolProfileBehavior": {
 				"disabledSystemHeaders": {
@@ -82,7 +19,7 @@
 					"bearer": [
 						{
 							"key": "token",
-							"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6IjIiLCJlbWFpbCI6InVzZXJAbWFpbGJhc2UuaW5mbyIsInJvbGUiOiJVc2VyIiwibmJmIjoxNjEzNDE4MjYxLCJleHAiOjE2MTM0MjE4NjEsImlhdCI6MTYxMzQxODI2MX0.tWHPLqm4whsXUkbSoJIL9VEINUpl7onAHuJszvurbSc",
+							"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6IjIiLCJlbWFpbCI6InVzZXJAbWFpbGJhc2UuaW5mbyIsInJvbGUiOiJVc2VyIiwibmJmIjoxNjE0NDQ4NTUyLCJleHAiOjE2MTQ0NTIxNTIsImlhdCI6MTYxNDQ0ODU1Mn0.BorOmw0NCtEgoi6RLz_WtZWGbcfmaUwagz4JV9f75G8",
 							"type": "string"
 						}
 					]
@@ -112,15 +49,73 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:4000/shopping/list",
+					"raw": "http://localhost:5678/shopping/list",
 					"protocol": "http",
 					"host": [
 						"localhost"
 					],
-					"port": "4000",
+					"port": "5678",
 					"path": [
 						"shopping",
 						"list"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update List",
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {
+					"connection": true,
+					"accept-encoding": true
+				}
+			},
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6IjIiLCJlbWFpbCI6InVzZXJAbWFpbGJhc2UuaW5mbyIsInJvbGUiOiJVc2VyIiwibmJmIjoxNjE0NDQ4NTUyLCJleHAiOjE2MTQ0NTIxNTIsImlhdCI6MTYxNDQ0ODU1Mn0.BorOmw0NCtEgoi6RLz_WtZWGbcfmaUwagz4JV9f75G8",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PATCH",
+				"header": [
+					{
+						"key": "Accept-Encoding",
+						"value": "application/json",
+						"type": "text",
+						"disabled": true
+					},
+					{
+						"key": "Access-Control-Allow-Origin",
+						"value": "*",
+						"type": "text",
+						"disabled": true
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"SyncID\":0,\r\n\"OldItemName\":\"Sprite\",\r\n\"NewItem\":{\"Item\":{\"Name\":\"Sprite\",\"ImagePath\":null,\"Category\":{\"Name\":\"Getränke\"}},\"Count\":11,\"Checked\":false}}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:5678/shopping/listupdate",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5678",
+					"path": [
+						"shopping",
+						"listupdate"
 					]
 				}
 			},
@@ -140,7 +135,7 @@
 					"bearer": [
 						{
 							"key": "token",
-							"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6IjIiLCJlbWFpbCI6InVzZXJAbWFpbGJhc2UuaW5mbyIsInJvbGUiOiJVc2VyIiwibmJmIjoxNjEzNDE4NjMyLCJleHAiOjE2MTM0MjIyMzIsImlhdCI6MTYxMzQxODYzMn0.M4kfX6MrhPlHvya4WoJmxpsZUflKFI2AiU7k9MW4ACc",
+							"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6IjIiLCJlbWFpbCI6InVzZXJAbWFpbGJhc2UuaW5mbyIsInJvbGUiOiJVc2VyIiwibmJmIjoxNjE0NDQ4NTUyLCJleHAiOjE2MTQ0NTIxNTIsImlhdCI6MTYxNDQ0ODU1Mn0.BorOmw0NCtEgoi6RLz_WtZWGbcfmaUwagz4JV9f75G8",
 							"type": "string"
 						}
 					]
@@ -168,12 +163,12 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:4000/shopping/list",
+					"raw": "http://localhost:5678/shopping/list",
 					"protocol": "http",
 					"host": [
 						"localhost"
 					],
-					"port": "4000",
+					"port": "5678",
 					"path": [
 						"shopping",
 						"list"
@@ -183,11 +178,21 @@
 			"response": []
 		},
 		{
-			"name": "User Register",
+			"name": "Register NEW User",
 			"protocolProfileBehavior": {
 				"disabledSystemHeaders": {}
 			},
 			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6IjIiLCJlbWFpbCI6InVzZXJAbWFpbGJhc2UuaW5mbyIsInJvbGUiOiJVc2VyIiwibmJmIjoxNjE0NDQ4NTUyLCJleHAiOjE2MTQ0NTIxNTIsImlhdCI6MTYxNDQ0ODU1Mn0.BorOmw0NCtEgoi6RLz_WtZWGbcfmaUwagz4JV9f75G8",
+							"type": "string"
+						}
+					]
+				},
 				"method": "POST",
 				"header": [
 					{
@@ -211,60 +216,15 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:4000/users/register",
+					"raw": "http://localhost:5678/users/register",
 					"protocol": "http",
 					"host": [
 						"localhost"
 					],
-					"port": "4000",
+					"port": "5678",
 					"path": [
 						"users",
 						"register"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "User Authenticate",
-			"protocolProfileBehavior": {
-				"disabledSystemHeaders": {
-					"accept-encoding": true
-				}
-			},
-			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "Accept-Encoding",
-						"value": "application/json",
-						"type": "text"
-					},
-					{
-						"key": "Access-Control-Allow-Origin",
-						"value": "*",
-						"type": "text"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"id\": \"a323fa3e-4280-4d0b-9aae-7de95f5a3d70\",\r\n    \"email\": \"jonas@test.com\",\r\n    \"password\": null,\r\n    \"token\": \"1234\"\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://localhost:4000/users/authenticate",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "4000",
-					"path": [
-						"users",
-						"authenticate"
 					]
 				}
 			},
@@ -301,12 +261,12 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:4000/users/authenticate",
+					"raw": "http://localhost:5678/users/authenticate",
 					"protocol": "http",
 					"host": [
 						"localhost"
 					],
-					"port": "4000",
+					"port": "5678",
 					"path": [
 						"users",
 						"authenticate"
@@ -346,12 +306,12 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:4000/users/authenticate",
+					"raw": "http://localhost:5678/users/authenticate",
 					"protocol": "http",
 					"host": [
 						"localhost"
 					],
-					"port": "4000",
+					"port": "5678",
 					"path": [
 						"users",
 						"authenticate"
@@ -392,12 +352,12 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:4000/shopping/list",
+					"raw": "http://localhost:5678/shopping/list",
 					"protocol": "http",
 					"host": [
 						"localhost"
 					],
-					"port": "4000",
+					"port": "5678",
 					"path": [
 						"shopping",
 						"list"
@@ -420,7 +380,7 @@
 					"bearer": [
 						{
 							"key": "token",
-							"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6IjA5NjQ3NjgwLWJmZDEtNDRkMC1iNzIxLWEyNTIxMDgzNDcyNSIsInJvbGUiOiJ1c2VyIiwibmJmIjoxNjEyODk4Nzg1LCJleHAiOjEwMjUyODEyMzg1LCJpYXQiOjE2MTI4OTg3ODV9.MKgULxaV-HabRcK_sPh9BxAZTid-RGVxmCsmQq9bo-4",
+							"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6IjIiLCJlbWFpbCI6InVzZXJAbWFpbGJhc2UuaW5mbyIsInJvbGUiOiJVc2VyIiwibmJmIjoxNjE0MDE0MzI0LCJleHAiOjE2MTQwMTc5MjQsImlhdCI6MTYxNDAxNDMyNH0.FCLnqI7u6XAAQVrDTf4LGrEVnuKGPW1c3HwvlkL3gkQ",
 							"type": "string"
 						}
 					]
@@ -460,12 +420,12 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:4000/shopping/id",
+					"raw": "http://localhost:5678/shopping/id",
 					"protocol": "http",
 					"host": [
 						"localhost"
 					],
-					"port": "4000",
+					"port": "5678",
 					"path": [
 						"shopping",
 						"id"
@@ -473,6 +433,94 @@
 				}
 			},
 			"response": []
+		},
+		{
+			"name": "Update List Copy",
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {
+					"connection": true,
+					"accept-encoding": true
+				}
+			},
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6IjIiLCJlbWFpbCI6InVzZXJAbWFpbGJhc2UuaW5mbyIsInJvbGUiOiJVc2VyIiwibmJmIjoxNjE0NDQ4NTUyLCJleHAiOjE2MTQ0NTIxNTIsImlhdCI6MTYxNDQ0ODU1Mn0.BorOmw0NCtEgoi6RLz_WtZWGbcfmaUwagz4JV9f75G8",
+							"type": "string"
+						}
+					]
+				},
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Accept-Encoding",
+						"value": "application/json",
+						"type": "text",
+						"disabled": true
+					},
+					{
+						"key": "Access-Control-Allow-Origin",
+						"value": "*",
+						"type": "text",
+						"disabled": true
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"SyncID\":\"0\"}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:5678/shopping/listupdate",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5678",
+					"path": [
+						"shopping",
+						"listupdate"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6IjIiLCJlbWFpbCI6InVzZXJAbWFpbGJhc2UuaW5mbyIsInJvbGUiOiJVc2VyIiwibmJmIjoxNjE2NjE4Njk3LCJleHAiOjE2MTY2MjIyOTcsImlhdCI6MTYxNjYxODY5N30.FAZlEW_D-XmQ1jik2Zb-GjL7YtWyUJywEn48Ikir_qM",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
 		}
 	]
 }
