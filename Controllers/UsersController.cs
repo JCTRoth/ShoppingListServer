@@ -55,8 +55,8 @@ namespace ShoppingListServer.Controllers
 
 
         /*
-        [Authorize(Roles = Role.Admin)]
-        [HttpGet]
+        [Authorize(Roles = Role.User)]
+        [HttpGet("all")]
         public IActionResult GetAll()
         {
             var users =  _userService.GetAll();
@@ -71,7 +71,7 @@ namespace ShoppingListServer.Controllers
             // only allow admin to access other user records
             var currentUserId = User.Identity.Name;
 
-            if (id != currentUserId && !User.IsInRole(Role.Admin))
+            if (id != currentUserId && !User.IsInRole(Role.User))
                 return Forbid();
 
             var user =  _userService.GetById(id);

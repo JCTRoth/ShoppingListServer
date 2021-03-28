@@ -11,11 +11,11 @@ namespace ShoppingListServer.Services
     public interface IShoppingService
     {
         string GetID();
-        Result GetList(string userID, string syncID);
+        Result GetList(string userID, int syncID);
         bool AddList(ShoppingList shoppingList);
-        bool Update_Item_In_List(string name_of_old_item, Item Old_Item, ShoppingList shoppingList);
+        bool Update_Item_In_List(string name_of_old_item, GenericProduct Old_Item, ShoppingList shoppingList);
         bool Remove_Item_In_List(string name_of_old_item, ShoppingList shoppingList);
-        bool Add_Item_To_List(Item new_item, ShoppingList shoppingList);
+        bool Add_Item_To_List(GenericProduct new_item, ShoppingList shoppingList);
         bool DeleteList(string userID, string del_syncID);
     }
 
@@ -109,12 +109,12 @@ namespace ShoppingListServer.Services
             return false;
         }
 
-        public bool Update_Item_In_List(string name_of_old_item, Item New_Item, ShoppingList shoppingList)
+        public bool Update_Item_In_List(string name_of_old_item, GenericProduct New_Item, ShoppingList shoppingList)
         {
             // Names in ShoppingLists are Unique
             for (int i = 0; i < shoppingList.ProductList.Count; i++)
             {
-                if (shoppingList.ProductList[i].GenericItem.Name == name_of_old_item)
+                if (shoppingList.ProductList[i].Item.Name == name_of_old_item)
                 {
                     shoppingList.ProductList[i] = New_Item;
                     _json_files.Update_ShoppingList(shoppingList.OwnerID, shoppingList);
@@ -131,7 +131,7 @@ namespace ShoppingListServer.Services
             return true;
         }
 
-        public bool Add_Item_To_List(Item new_item, ShoppingList shoppingList)
+        public bool Add_Item_To_List(GenericProduct new_item, ShoppingList shoppingList)
         {
             // TO DO
             return true;

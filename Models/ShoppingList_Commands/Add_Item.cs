@@ -7,6 +7,6 @@ namespace ShoppingListServer.Models
         // SyncID of List
         public int SyncID { get; set; }
 
-        public Item Item { get; set; }
+        public GenericProduct Item { get; set; }
     }
 }

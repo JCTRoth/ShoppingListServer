@@ -33,8 +33,8 @@ namespace ShoppingListServer.Controllers
         }
 
         [Authorize(Roles = Role.User)]
-        [HttpGet("list")]
-        public IActionResult GetList([FromBody] string syncID)
+        [HttpGet("list/{syncID}")]
+        public IActionResult GetList(int syncID)
         {
             try
             {

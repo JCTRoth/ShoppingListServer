@@ -14,7 +14,7 @@ namespace ShoppingListServer.Entities
 
         public string Category { get; set; }
 
-        public List<Item> ProductList { get; set; }
+        public List<GenericProduct> ProductList { get; set; }
 
         public string OwnerID { get; set; }
         

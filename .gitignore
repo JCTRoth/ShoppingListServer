@@ -18,6 +18,9 @@
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
 
+# Visual Studio 2015 cache/options directory
+.vs/
+
 # Mono auto generated files
 mono_crash.*
 

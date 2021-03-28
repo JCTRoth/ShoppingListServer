@@ -9,6 +9,6 @@ namespace ShoppingListServer.Models
 
         public string OldItemName { get; set; }
 
-        public Item NewItem { get; set; }
+        public GenericProduct NewItem { get; set; }
     }
 }
