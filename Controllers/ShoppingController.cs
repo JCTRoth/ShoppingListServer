@@ -6,6 +6,7 @@ using ShoppingListServer.Entities;
 using ShoppingListServer.Services;
 using ShoppingListServer.Models;
 using ShoppingListServer.Logic;
+using ShoppingListServer.Database;
 
 namespace ShoppingListServer.Controllers
 {
@@ -34,7 +35,7 @@ namespace ShoppingListServer.Controllers
 
         [Authorize(Roles = Role.User)]
         [HttpGet("list/{syncID}")]
-        public IActionResult GetList(int syncID)
+        public IActionResult GetList(string syncID)
         {
             try
             {
@@ -74,7 +75,13 @@ namespace ShoppingListServer.Controllers
 
                 if (added)
                 {
-                    return Ok();
+                    Result result = new Result();
+
+                    // TO DO Check if user is allowed
+
+                    //result.WasFound = true;
+                    //result.ReturnValue = JsonConvert.SerializeObject(new_list_item);
+                    return Ok(new_list_item);
                 }
 
                 // already in List

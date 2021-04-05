@@ -6,6 +6,7 @@ using System.Security.Claims;
 using System.Text;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using ShoppingListServer.Database;
 using ShoppingListServer.Entities;
 using ShoppingListServer.Helpers;
 using ShoppingListServer.Logic;
@@ -27,12 +28,13 @@ namespace ShoppingListServer.Services
     public class UserService : IUserService
     {
         private readonly AppSettings _appSettings;
+        private readonly AppDb _db;
 
-        public UserService(IOptions<AppSettings> appSettings)
+        public UserService(IOptions<AppSettings> appSettings, AppDb db)
         {
             _appSettings = appSettings.Value;
+            _db = db;
         }
-
 
         public bool AddUser(User new_user)
         {
@@ -48,9 +50,9 @@ namespace ShoppingListServer.Services
 
             // Check if user in list
             // ID
-            bool id = Program._users.Any(user => user.Id == new_user.Id);
+            bool id = _db.Users.Any(user => user.Id == new_user.Id);
             // EMail
-            bool email = Program._users.Any(user => user.EMail == new_user.EMail);
+            bool email = _db.Users.Any(user => user.EMail == new_user.EMail);
 
             if(id || email)
             {
@@ -59,9 +61,10 @@ namespace ShoppingListServer.Services
             }
 
             // Add User to list
-            if (Folder.Create_User_Folder(new_user.Id))
+            if (Folder.Create_User_Folder(new_user.Guid))
             {
-                Program._users.Add(new_user);
+                _db.Users.Add(new_user);
+                _db.SaveChanges();
                 return true;
             }
 
@@ -108,7 +111,7 @@ namespace ShoppingListServer.Services
             {
                 Subject = new ClaimsIdentity(new Claim[] 
                 {
-                    new Claim(ClaimTypes.Name, user.Id),
+                    new Claim(ClaimTypes.Name, user.Guid),
                     new Claim(ClaimTypes.Email, user.EMail),
                     new Claim(ClaimTypes.Role, user.Role)
                 }),
@@ -119,6 +122,7 @@ namespace ShoppingListServer.Services
 
             var token = tokenHandler.CreateToken(tokenDescriptor);
             user.Token = tokenHandler.WriteToken(token);
+            _db.SaveChanges();
 
             return user.WithoutPassword();
         }
@@ -128,7 +132,7 @@ namespace ShoppingListServer.Services
         // Requests without password field will have value null 
         private dynamic FindUser_ID(string id, string password)
         {
-            var user = Program._users.SingleOrDefault(x => x.Id == id && x.Password == password);
+            var user = _db.Users.SingleOrDefault(x => x.Guid == id && x.Password == password);
 
             return user;
         }
@@ -139,7 +143,7 @@ namespace ShoppingListServer.Services
         {
             if(Tools.Is_NOT_empty(password))
             {
-                return Program._users.SingleOrDefault(x => x.EMail == email && x.Password == password);
+                return _db.Users.SingleOrDefault(x => x.EMail == email && x.Password == password);
             }
             else
             {
@@ -149,12 +153,12 @@ namespace ShoppingListServer.Services
 
         public IEnumerable<User> GetAll()
         {
-            return Program._users.WithoutPasswords();
+            return _db.Users.WithoutPasswords();
         }
 
         public User GetById(string id) 
         {
-            var user = Program._users.FirstOrDefault(x => x.Id == id);
+            var user = _db.Users.FirstOrDefault(x => x.Guid == id);
             return user.WithoutPassword();
         }
     }

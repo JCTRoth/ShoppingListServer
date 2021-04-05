@@ -6,8 +6,11 @@ namespace ShoppingListServer.Entities
 {
     public class User
     {
+        // The unique id. Must be part of each entity, see https://docs.microsoft.com/en-us/ef/core/modeling/keys?tabs=data-annotations.
+        public int Id { get; set; }
+
         [Required]
-        public string Id { get; set; }
+        public string Guid { get; set; }
 
         public string EMail { get; set; }
         public string FirstName { get; set; }

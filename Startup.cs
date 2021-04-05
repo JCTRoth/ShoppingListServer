@@ -7,6 +7,10 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using ShoppingListServer.Helpers;
 using ShoppingListServer.Services;
+using Microsoft.EntityFrameworkCore;
+using ShoppingListServer.Database;
+using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
+using System;
 
 namespace ShoppingListServer
 {
@@ -54,6 +58,27 @@ namespace ShoppingListServer
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IShoppingService, ShoppingService>();
             services.AddScoped<ILoggingService, LoggingService>();
+
+            // MySql database
+            // Pomelo.EntityFrameworkCore.MySql: https://github.com/PomeloFoundation/Pomelo.EntityFrameworkCore.MySql
+            // A MySql database must be setup in the system with a name and user access specified in appsettings.json
+            string connectionString = "server=" + appSettings.DbServerAddress + ";" +
+                "user=" + appSettings.DbUser + ";" +
+                "password=" + appSettings.DbPassword + ";" +
+                "database=" + appSettings.DbName + ";";
+            services.AddDbContextPool<AppDb>(
+                options => options
+                    .UseMySql(
+                        connectionString,
+                        new MySqlServerVersion(new Version(8, 0, 23)),
+                        mysqlOptions =>
+                        {
+                            mysqlOptions.CharSetBehavior(CharSetBehavior.NeverAppend);
+                            //mysqlOptions.EnableRetryOnFailure(5, TimeSpan.FromSeconds(5), null);
+                        })
+                    .EnableSensitiveDataLogging()
+                    .EnableDetailedErrors()
+            );
 
         }
 

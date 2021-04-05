@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using Microsoft.Extensions.Options;
+using ShoppingListServer.Database;
 using ShoppingListServer.Entities;
 using ShoppingListServer.Helpers;
 using ShoppingListServer.Logic;
@@ -11,7 +12,7 @@ namespace ShoppingListServer.Services
     public interface IShoppingService
     {
         string GetID();
-        Result GetList(string userID, int syncID);
+        Result GetList(string userID, string syncID);
         bool AddList(ShoppingList shoppingList);
         bool Update_Item_In_List(string name_of_old_item, GenericProduct Old_Item, ShoppingList shoppingList);
         bool Remove_Item_In_List(string name_of_old_item, ShoppingList shoppingList);
@@ -23,11 +24,13 @@ namespace ShoppingListServer.Services
     {
         private readonly AppSettings _appSettings;
         private readonly Json_Files _json_files;
+        private readonly AppDb _db;
 
-        public ShoppingService(IOptions<AppSettings> appSettings)
+        public ShoppingService(IOptions<AppSettings> appSettings, AppDb db)
         {
             _appSettings = appSettings.Value;
             _json_files = new Json_Files();
+            _db = db;
         }
 
 
@@ -61,7 +64,6 @@ namespace ShoppingListServer.Services
             return result;
         }
 
-
         public bool AddList(ShoppingList new_list_item)
         {
             // TODO CHANGE TO RETURN AN ID
@@ -77,6 +79,7 @@ namespace ShoppingListServer.Services
             else
             {
                 // TO DO OwnerID
+                new_list_item.SyncID = Guid.NewGuid().ToString();
                 if (_json_files.Store_ShoppingList(new_list_item.OwnerID, new_list_item))
                 {
                     Program._shoppingLists.Add(new_list_item);
