@@ -41,7 +41,7 @@ namespace ShoppingListServer.Services
             // When Email address was set, than check if valid
             if(! string.IsNullOrEmpty(new_user.EMail))
             {
-                if (! Tools.Is_Valid_Email(new_user.EMail))
+                if (! new Mail_Tools().Is_Valid_Email(new_user.EMail))
                 {
                     // Not Valid
                     return false;
@@ -101,7 +101,6 @@ namespace ShoppingListServer.Services
                 }
             }
 
-
             // return null if user not found
             if (user == null)
             {
@@ -122,7 +121,7 @@ namespace ShoppingListServer.Services
                     new Claim(ClaimTypes.Email, user.EMail),
                     new Claim(ClaimTypes.Role, user.Role)
                 }),
-                // TODO 
+                // TODO Expire Token
                 // Expires = DateTime.UtcNow.AddDays(99999),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             };

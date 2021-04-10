@@ -42,7 +42,7 @@ namespace ShoppingListServer.Controllers
             new_user.Guid = Guid.NewGuid().ToString();
 
             // A Unique Id will be used as User Id:
-            // TO DO Check if entry is already registered
+            // TODO Check if entry is already registered
             if (_userService.AddUser(new_user))
             {
                 return Ok(new_user);

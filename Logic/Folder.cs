@@ -33,7 +33,7 @@ namespace ShoppingListServer.Logic
         {
             string full_path = System.IO.Path.Combine(Get_Home_Folder(), new_folder);
 
-            // TO DO REPLACE BY SERVICE
+            // TODO REPLACE BY SERVICE
             Program._data_storage_folder = full_path;
 
             if (Create_Folder(full_path))

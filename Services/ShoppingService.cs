@@ -67,9 +67,8 @@ namespace ShoppingListServer.Services
             // new SyncID
             new_list_item.SyncID = this.GetID();
 
-            if (_json_files.Store_ShoppingList(new_list_item.OwnerID, shoppingList: new_list_item))
+            if (_json_files.Store_ShoppingList(new_list_item.OwnerID, new_list_item))
             {
-                Program._shoppingLists.Add(new_list_item);
                 result.ReturnValue = new_list_item.SyncID;
                 result.WasFound = true;
                 return result;

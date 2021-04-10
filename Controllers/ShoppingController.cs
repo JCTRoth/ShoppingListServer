@@ -85,13 +85,21 @@ namespace ShoppingListServer.Controllers
         public IActionResult DeleteList([FromBody] string del_syncID)
         {
             string userID = HttpContext.User.Identity.Name;
+            Result list_result = _shoppingService.GetList(userID, del_syncID);
 
-            // TO DO Check if user is allowed
-            bool deleted = _shoppingService.DeleteList(userID, del_syncID);
-
-            if (deleted)
+            if (_user_access.Is_User_Allowed_To_Delete(User.Identity.Name, list_result.ReturnValue))
             {
-                return Ok();
+                bool deleted = _shoppingService.DeleteList(userID, del_syncID);
+
+                if (deleted)
+                {
+                    return Ok();
+                }
+
+            }
+            else
+            {
+                return BadRequest(new { message = "Not allowed to delete" });
             }
 
             return BadRequest(new { message = "JSON Error - Not Deleted" });
