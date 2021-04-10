@@ -1,5 +1,3 @@
-using System.ComponentModel.DataAnnotations;
-
 namespace ShoppingListServer.Entities
 {
     public class Authenticate

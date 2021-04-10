@@ -14,3 +14,10 @@ https://github.com/danielroth1/ShoppingListApp
 ```bash
 docker container run -d --name 'shopping-list' -p 5678:5678 sha256:6ecc3a5e1f501e6c2ea374176fd3e9f469eebae8ed6355818cd1393eb8fdd994
 ```
+
+***DB Setup***
+
+dotnet tool install --global dotnet-ef
+dotnet add package Microsoft.EntityFrameworkCore.Design
+dotnet ef migrations add InitialCreate
+dotnet ef database update

@@ -1,4 +1,4 @@
-﻿using ShoppingListServer.Entities;
+﻿using ShoppingListServer.Models;
 
 namespace ShoppingListServer.Logic
 {

@@ -231,52 +231,7 @@
 			"response": []
 		},
 		{
-			"name": "Authenticate Admin Account",
-			"protocolProfileBehavior": {
-				"disabledSystemHeaders": {
-					"accept-encoding": true
-				}
-			},
-			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "Accept-Encoding",
-						"value": "application/json",
-						"type": "text"
-					},
-					{
-						"key": "Access-Control-Allow-Origin",
-						"value": "*",
-						"type": "text"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"id\": \"1\",\r\n    \"password\":\"admin\"\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://localhost:5678/users/authenticate",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "5678",
-					"path": [
-						"users",
-						"authenticate"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Authenticate User Account",
+			"name": "Authenticate NEW User",
 			"protocolProfileBehavior": {
 				"disabledSystemHeaders": {
 					"accept-encoding": true

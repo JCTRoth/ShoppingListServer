@@ -1,8 +1,7 @@
 using System;
 using System.Collections.Generic;
-using Newtonsoft.Json;
 
-namespace ShoppingListServer.Entities
+namespace ShoppingListServer.Models
 {
     public class ShoppingList
     {
@@ -10,7 +9,8 @@ namespace ShoppingListServer.Entities
 
         // Unique Identity of the ShoppingList
         // App pulls the SyncID from the Server.
-        public string SyncID { get; set; }
+        // Is non when no list was loaded from storage.
+        public string SyncID { get; set; } = "non";
 
         public string Category { get; set; }
 

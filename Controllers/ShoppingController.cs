@@ -7,6 +7,7 @@ using ShoppingListServer.Services;
 using ShoppingListServer.Models;
 using ShoppingListServer.Logic;
 using ShoppingListServer.Database;
+using ShoppingListServer.Models.Commands;
 
 namespace ShoppingListServer.Controllers
 {
@@ -22,15 +23,6 @@ namespace ShoppingListServer.Controllers
         {
             _shoppingService = shoppingService;
             _user_access = new User_Access();
-        }
-
-        // Returns a List ID to the App
-        // The App can than Upload a new List with this UID
-        [Authorize(Roles = Role.User)]
-        [HttpGet("id")]
-        public IActionResult GetID()
-        {
-            return Ok(_shoppingService.GetID());
         }
 
         [Authorize(Roles = Role.User)]
@@ -56,7 +48,6 @@ namespace ShoppingListServer.Controllers
             }
         }
 
-        // [AllowAnonymous] // TO DO Change to restricted
         [Authorize(Roles = Role.User)]
         [HttpPost("list")]
         public IActionResult AddList([FromBody] object shoppingList_json_object)
@@ -69,19 +60,13 @@ namespace ShoppingListServer.Controllers
                 // Don't allow other users to create a shopping list for other users
                 new_list_item.OwnerID = User.Identity.Name;
 
-                // TO DO Replace by DB
                 // Add to list of shoppingLists
-                bool added = _shoppingService.AddList(new_list_item);
+                Result was_added = _shoppingService.AddList(new_list_item);
 
-                if (added)
+                if (was_added.WasFound)
                 {
-                    Result result = new Result();
-
-                    // TO DO Check if user is allowed
-
-                    //result.WasFound = true;
-                    //result.ReturnValue = JsonConvert.SerializeObject(new_list_item);
-                    return Ok(new_list_item);
+                    // Return SyncId of List
+                    return Ok(was_added.ReturnValue);
                 }
 
                 // already in List

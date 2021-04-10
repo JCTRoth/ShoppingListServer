@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using ShoppingListServer.Services;
 using ShoppingListServer.Entities;
 using Newtonsoft.Json;
+using ShoppingListServer.Models;
 
 namespace ShoppingListServer.Controllers
 {
@@ -23,12 +24,12 @@ namespace ShoppingListServer.Controllers
         [HttpPost("authenticate")]
         public IActionResult Authenticate([FromBody]Authenticate model)
         {
-            var user = _userService.Authenticate(model.Id, model.Email, model.Password);
+            Result user = _userService.Authenticate(model.Id, model.Email, model.Password);
 
-            if (user == null)
+            if (user.WasFound == false)
                 return BadRequest(new { message = "Id or password is incorrect" });
 
-            return Ok(user);
+            return Ok(user.ReturnValue);
         }
 
         // Used to register users with id only or full users

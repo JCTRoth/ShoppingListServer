@@ -1,7 +1,4 @@
-using Newtonsoft.Json;
-using System.Collections.Generic;
-
-namespace ShoppingListServer.Entities
+namespace ShoppingListServer.Models
 {
     public class GenericProduct
     {
