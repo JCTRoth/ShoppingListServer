@@ -1,23 +1,27 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using ShoppingListServer.Database;
 using ShoppingListServer.Entities;
+using ShoppingListServer.Exceptions;
 using ShoppingListServer.Helpers;
 using ShoppingListServer.Logic;
 using ShoppingListServer.Models;
+using ShoppingListServer.Models.ShoppingData;
 
 namespace ShoppingListServer.Services
 {
     public interface IShoppingService
     {
         string GetID();
-        Result GetList(string userID, string syncID);
-        bool AddList(ShoppingList shoppingList);
-        bool Update_Item_In_List(string name_of_old_item, GenericProduct Old_Item, ShoppingList shoppingList);
-        bool Remove_Item_In_List(string name_of_old_item, ShoppingList shoppingList);
-        bool Add_Item_To_List(GenericProduct new_item, ShoppingList shoppingList);
-        bool DeleteList(string userID, string del_syncID);
+        ShoppingList GetList(string userId, string shoppingListId);
+        bool AddList(ShoppingList list, string userID);
+        bool Update_Item_In_List(string itemNameOld, GenericProduct itemNew, string userId, string shoppingListId);
+        bool Remove_Item_In_List(string itemNameOld, string userId, string shoppingListId);
+        bool Add_Item_To_List(GenericProduct newItem, string userId, string shoppingListId);
+        bool DeleteList(string userId, string shoppingListId);
     }
 
     public class ShoppingService : IShoppingService
@@ -37,52 +41,43 @@ namespace ShoppingListServer.Services
         public string GetID()
         {
             string new_id = Guid.NewGuid().ToString();
-
-            // TODO REPLACE BY DB
-            Program._syncIDs.Add(new_id);
-
             return new_id;
         }
 
-        public Result GetList(string userID, string syncID)
+        public ShoppingList GetList(string userId, string shoppingListId)
         {
-            Result result = new Result();
-
-            // TO DO Check if user is allowed
-            int index = Program._shoppingLists.FindIndex(ShoppingList => ShoppingList.SyncID == syncID);
-            if (index != -1)
-            {
-                result.WasFound = true;
-                result.ReturnValue = _json_files.Load_ShoppingList(userID, syncID);
-            }
-            else
-            {
-                result.ReturnValue = "";
-                result.WasFound = false;
-            }
-
-            return result;
+            ShoppingList list = GetShoppingListEntity(shoppingListId);
+            if (list == null)
+                throw new ShoppingListNotFoundException(shoppingListId);
+            CheckPermission(list, userId, ShoppingListPermissionType.Read);
+            return _json_files.Load_ShoppingList(userId, shoppingListId);
         }
 
-        public bool AddList(ShoppingList new_list_item)
+        // Adds the given list to this server.
+        // Sets list.Id and list.ShoppingListPermissions
+        public bool AddList(ShoppingList list, string userID)
         {
-            // TODO CHANGE TO RETURN AN ID
-            // TODO Replace by DB
-            // Add to list of shoppingLists
-            bool is_in_list = Program._shoppingLists.Any(ShoppingList => ShoppingList.SyncID == new_list_item.SyncID);
-
-            if (is_in_list)
+            throw new Exception("This is a test exception.");
+            ShoppingList existingList = GetShoppingListEntity(list.Id);
+            if (existingList != null)
             {
-                // already in List
                 return false;
             }
             else
             {
-                // TO DO OwnerID
-                new_list_item.SyncID = Guid.NewGuid().ToString();
-                if (_json_files.Store_ShoppingList(new_list_item.OwnerID, new_list_item))
+                list.Id = Guid.NewGuid().ToString();
+                list.ShoppingListPermissions = new List<ShoppingListPermission>();
+                list.ShoppingListPermissions.Add(new ShoppingListPermission()
                 {
-                    Program._shoppingLists.Add(new_list_item);
+                    PermissionType = ShoppingListPermissionType.All,
+                    ShoppingList = list,
+                    UserId = userID
+                });
+                
+                if (_json_files.Store_ShoppingList(list.ShoppingListPermissions.FirstOrDefault().UserId, list))
+                {
+                    _db.ShoppingLists.Add(list);
+                    _db.SaveChanges();
                     return true;
                 }
                 else
@@ -92,52 +87,91 @@ namespace ShoppingListServer.Services
             }
         }
 
-
-
-        public bool DeleteList(string userID, string del_syncID)
+        public bool DeleteList(string userId, string shoppingListId)
         {
-            // TODO Check if user is allowed
-
-            int del_index = Program._shoppingLists.FindIndex(ShoppingList => ShoppingList.SyncID == del_syncID);
-            if (del_index != -1)
-            {
-                // TO DO REPLACE
-                Program._shoppingLists.RemoveAt(del_index);
-
-                _json_files.Delete_ShoppingList(userID, del_syncID);
-
-                return true;
-            }
-
-            return false;
-        }
-
-        public bool Update_Item_In_List(string name_of_old_item, GenericProduct New_Item, ShoppingList shoppingList)
-        {
-            // Names in ShoppingLists are Unique
-            for (int i = 0; i < shoppingList.ProductList.Count; i++)
-            {
-                if (shoppingList.ProductList[i].Item.Name == name_of_old_item)
-                {
-                    shoppingList.ProductList[i] = New_Item;
-                    _json_files.Update_ShoppingList(shoppingList.OwnerID, shoppingList);
-                    return true;
-                }
-            }
-            
-            return false;
-        }
-
-        public bool Remove_Item_In_List(string name_of_old_item, ShoppingList shoppingList)
-        {
-            // TO DO
+            ShoppingList listEntity = GetShoppingListEntity(shoppingListId);
+            if (listEntity == null)
+                throw new ShoppingListNotFoundException(shoppingListId);
+            CheckPermission(listEntity, userId, ShoppingListPermissionType.Delete);
+            _db.ShoppingLists.Remove(listEntity);
+            _db.SaveChanges();
+            _json_files.Delete_ShoppingList(userId, shoppingListId);
             return true;
         }
 
-        public bool Add_Item_To_List(GenericProduct new_item, ShoppingList shoppingList)
+        public bool Update_Item_In_List(string itemNameOld, GenericProduct itemNew, string userId, string shoppingListId)
         {
-            // TO DO
-            return true;
+            ShoppingList listEntity = GetShoppingListEntity(shoppingListId);
+            if (listEntity == null)
+                throw new ShoppingListNotFoundException(shoppingListId);
+            CheckPermission(listEntity, userId, ShoppingListPermissionType.Write);
+            ShoppingList list = _json_files.Load_ShoppingList(userId, shoppingListId);
+
+            int index = list.ProductList.FindIndex(prod => prod.Item.Name == itemNameOld);
+            if (index != -1)
+            {
+                list.ProductList[index] = itemNew;
+            }
+            else
+            {
+                list.ProductList.Add(itemNew);
+            }
+
+            return _json_files.Update_ShoppingList(userId, list);
+        }
+
+        public bool Remove_Item_In_List(string itemNameOld, string userId, string shoppingListId)
+        {
+            ShoppingList listEntity = GetShoppingListEntity(shoppingListId);
+            if (listEntity == null)
+                throw new ShoppingListNotFoundException(shoppingListId);
+            CheckPermission(listEntity, userId, ShoppingListPermissionType.Write);
+            ShoppingList list = _json_files.Load_ShoppingList(userId, shoppingListId);
+
+            int index = list.ProductList.FindIndex(prod => prod.Item.Name == itemNameOld);
+            if (index != -1)
+            {
+                list.ProductList.RemoveAt(index);
+                return _json_files.Update_ShoppingList(userId, list);
+            }
+            return false;
+        }
+
+        public bool Add_Item_To_List(GenericProduct newItem, string userId, string shoppingListId)
+        {
+            ShoppingList listEntity = GetShoppingListEntity(shoppingListId);
+            if (listEntity == null)
+                throw new ShoppingListNotFoundException(shoppingListId);
+            CheckPermission(listEntity, userId, ShoppingListPermissionType.Write);
+            ShoppingList list = _json_files.Load_ShoppingList(userId, shoppingListId);
+
+            int index = list.ProductList.FindIndex(prod => prod.Item.Name == newItem.Item.Name);
+            if (index == -1)
+            {
+                list.ProductList[index] = newItem;
+                return _json_files.Update_ShoppingList(userId, list);
+            }
+            return false;
+        }
+
+        private ShoppingList GetShoppingListEntity(string shoppingListId)
+        {
+            return _db.ShoppingLists.FirstOrDefault(ShoppingList => ShoppingList.Id == shoppingListId);
+        }
+
+        private void CheckPermission(ShoppingList list, string userId, ShoppingListPermissionType expectedPermission)
+        {
+            var permissions = list.ShoppingListPermissions
+                .Where(per => per.UserId == userId && per.PermissionType.HasFlag(expectedPermission))
+                .ToList();
+            ShoppingListPermission permission = permissions.FirstOrDefault();                
+                
+                //(from per in list.ShoppingListPermissions
+                // where per.UserId == userId && per.PermissionType.HasFlag(expectedPermission)
+                // select per).FirstOrDefault();
+
+            if (permission == null)
+                throw new NoShoppingListPermissionException(permission, expectedPermission);
         }
     }
 }

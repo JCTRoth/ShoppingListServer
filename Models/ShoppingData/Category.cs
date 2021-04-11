@@ -8,7 +8,5 @@ namespace ShoppingListServer.Entities
         public string Name { get; set; }
 
         public string ImagePath { get; set; }
-
-        public List<GenericProduct> ProductList{ get; set; }
     }
 }

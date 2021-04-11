@@ -19,13 +19,9 @@ namespace ShoppingListServer.Logic
         {
             try
             {
-                string file_path = System.IO.Path.Combine(Folder.Get_User_Folder_Path(user_id),
-                                                                        shoppingList_id + ".json");
-
+                string file_path = System.IO.Path.Combine(Folder.Get_User_Folder_Path(user_id), shoppingList_id + ".json");
                 string file_content = File.ReadAllText(file_path);
-                ShoppingList loaded_shoppinglist = JsonConvert.DeserializeObject<ShoppingList>(file_content);
-
-                return loaded_shoppinglist;
+                return JsonConvert.DeserializeObject<ShoppingList>(file_content);
             }
             catch (Exception ex)
             {
@@ -39,7 +35,7 @@ namespace ShoppingListServer.Logic
             try
             {
                 string folder_path = Folder.Get_User_Folder_Path(user_id);
-                string file_path = System.IO.Path.Combine(folder_path, shoppingList.SyncID + ".json");
+                string file_path = System.IO.Path.Combine(folder_path, shoppingList.Id + ".json");
                 string list_as_string = JsonConvert.SerializeObject(shoppingList);
 
                 if (!System.IO.Directory.Exists(folder_path))
@@ -63,7 +59,7 @@ namespace ShoppingListServer.Logic
             try
             {
                 string folder_path = Folder.Get_User_Folder_Path(user_id);
-                string file_path = System.IO.Path.Combine(folder_path, shoppingList.SyncID + ".json");
+                string file_path = System.IO.Path.Combine(folder_path, shoppingList.Id + ".json");
                 string list_as_string = JsonConvert.SerializeObject(shoppingList);
 
                 if (!System.IO.Directory.Exists(folder_path))
