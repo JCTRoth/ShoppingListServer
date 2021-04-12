@@ -16,7 +16,7 @@ namespace ShoppingListServer.Services
 {
     public interface IUserService
     {
-        User Authenticate(string id, string email, string password);
+        Result Authenticate(string id, string email, string password);
 
         bool AddUser(User new_user);
 
@@ -39,9 +39,9 @@ namespace ShoppingListServer.Services
         public bool AddUser(User new_user)
         {
             // When Email address was set, than check if valid
-            if(Tools.Is_NOT_empty(new_user.EMail))
+            if(! string.IsNullOrEmpty(new_user.EMail))
             {
-                if (! Tools.Is_Valid_Email(new_user.EMail))
+                if (! new Mail_Tools().Is_Valid_Email(new_user.EMail))
                 {
                     // Not Valid
                     return false;
@@ -61,7 +61,7 @@ namespace ShoppingListServer.Services
             }
 
             // Add User to list
-            if (Folder.Create_User_Folder(new_user.Id))
+            if (new Folder().Create_User_Folder(new_user.Id))
             {
                 _db.Users.Add(new_user);
                 _db.SaveChanges();
@@ -71,9 +71,10 @@ namespace ShoppingListServer.Services
             return false;
         }
 
-        public User Authenticate(string id, string email, string password)
+        public Result Authenticate(string id, string email, string password)
         {
-            var user = new User();
+            Result result = new Result();
+            User user;
 
             // Valid
             // Id = "123", Email == null, password == null
@@ -82,26 +83,31 @@ namespace ShoppingListServer.Services
             // Invalid
             // Email is set but no pw
             //
-            if (Tools.Is_NOT_empty(id))
+
+            if (! string.IsNullOrEmpty(id))
             {
                 user = FindUser_ID(id, password);
             }
             else
             {
-                if (Tools.Is_NOT_empty(email))
+                if (! string.IsNullOrEmpty(email))
                 {
-                    user = FindUser_EMail(email, password);
+                    return FindUser_EMail(email, password);
                 }
                 else
                 {
-                    return null;
+                    result.WasFound = false;
+                    return result;
                 }
             }
 
-
             // return null if user not found
             if (user == null)
-                return null;
+            {
+                result.WasFound = false;
+                return result;
+            }
+
 
             // authentication successful so generate jwt token
             var tokenHandler = new JwtSecurityTokenHandler();
@@ -115,7 +121,7 @@ namespace ShoppingListServer.Services
                     new Claim(ClaimTypes.Email, user.EMail),
                     new Claim(ClaimTypes.Role, user.Role)
                 }),
-                // TODO 
+                // TODO Expire Token
                 // Expires = DateTime.UtcNow.AddDays(99999),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             };
@@ -124,7 +130,9 @@ namespace ShoppingListServer.Services
             user.Token = tokenHandler.WriteToken(token);
             _db.SaveChanges();
 
-            return user.WithoutPassword();
+            result.WasFound = true;
+            result.ReturnValue = user.WithoutPassword();
+            return result;
         }
 
         // Returns null when user not found
@@ -139,15 +147,20 @@ namespace ShoppingListServer.Services
 
         // Returns null when user not found
         // Email only has to have pw in request
-        private dynamic FindUser_EMail(string email, string password)
+        private Result FindUser_EMail(string email, string password)
         {
-            if(Tools.Is_NOT_empty(password))
+            Result result = new Result();
+
+            if(! string.IsNullOrEmpty(password))
             {
-                return _db.Users.SingleOrDefault(x => x.EMail == email && x.Password == password);
+                result.WasFound = true;
+                result.ReturnValue = _db.Users.SingleOrDefault(x => x.EMail == email && x.Password == password);
+                return result;
             }
             else
             {
-                return false;
+                result.WasFound = false;
+                return result;
             }
         }
 

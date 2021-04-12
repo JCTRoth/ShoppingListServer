@@ -1,16 +1,16 @@
-﻿using System.Text;
+﻿using System;
+using System.Text;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
+using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
+using ShoppingListServer.Database;
 using ShoppingListServer.Helpers;
 using ShoppingListServer.Services;
-using Microsoft.EntityFrameworkCore;
-using ShoppingListServer.Database;
-using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
-using System;
 using Microsoft.AspNetCore.Diagnostics;
 using Newtonsoft.Json;
 using Microsoft.AspNetCore.Http;
@@ -60,7 +60,6 @@ namespace ShoppingListServer
             // configure DI for application services
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IShoppingService, ShoppingService>();
-            services.AddScoped<ILoggingService, LoggingService>();
 
             // MySql database
             // Pomelo.EntityFrameworkCore.MySql: https://github.com/PomeloFoundation/Pomelo.EntityFrameworkCore.MySql

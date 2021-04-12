@@ -57,7 +57,6 @@ namespace ShoppingListServer.Services
         // Sets list.Id and list.ShoppingListPermissions
         public bool AddList(ShoppingList list, string userID)
         {
-            throw new Exception("This is a test exception.");
             ShoppingList existingList = GetShoppingListEntity(list.Id);
             if (existingList != null)
             {

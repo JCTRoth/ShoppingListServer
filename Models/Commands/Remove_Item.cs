@@ -1,4 +1,4 @@
-﻿namespace ShoppingListServer.Models
+﻿namespace ShoppingListServer.Models.Commands
 {
     class Remove_Item
     {

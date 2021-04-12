@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using Newtonsoft.Json;
 using ShoppingListServer.Models.ShoppingData;
 
-namespace ShoppingListServer.Entities
+namespace ShoppingListServer.Models
 {
     public class ShoppingList
     {

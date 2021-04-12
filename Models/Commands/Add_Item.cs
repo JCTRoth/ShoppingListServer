@@ -1,6 +1,4 @@
-﻿using ShoppingListServer.Entities;
-
-namespace ShoppingListServer.Models
+﻿namespace ShoppingListServer.Models.Commands
 {
     class Update_Command
     {

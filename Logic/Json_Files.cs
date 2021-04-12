@@ -1,8 +1,7 @@
 ﻿using System;
 using System.IO;
-using System.Text.Unicode;
 using Newtonsoft.Json;
-using ShoppingListServer.Entities;
+using ShoppingListServer.Models;
 
 namespace ShoppingListServer.Logic
 {
@@ -10,16 +9,19 @@ namespace ShoppingListServer.Logic
     {
         // TODO USER fastJSON
 
+        Folder _folder_service;
         public Json_Files()
         {
-
+            _folder_service = new Folder();
         }
 
         public ShoppingList Load_ShoppingList(string user_id, string shoppingList_id)
         {
             try
             {
-                string file_path = System.IO.Path.Combine(Folder.Get_User_Folder_Path(user_id), shoppingList_id + ".json");
+                string file_path = System.IO.Path.Combine(_folder_service.Get_User_Folder_Path(user_id),
+                                                                        shoppingList_id + ".json");
+
                 string file_content = File.ReadAllText(file_path);
                 return JsonConvert.DeserializeObject<ShoppingList>(file_content);
             }
@@ -34,7 +36,7 @@ namespace ShoppingListServer.Logic
         {
             try
             {
-                string folder_path = Folder.Get_User_Folder_Path(user_id);
+                string folder_path = _folder_service.Get_User_Folder_Path(user_id);
                 string file_path = System.IO.Path.Combine(folder_path, shoppingList.Id + ".json");
                 string list_as_string = JsonConvert.SerializeObject(shoppingList);
 
@@ -58,7 +60,7 @@ namespace ShoppingListServer.Logic
         {
             try
             {
-                string folder_path = Folder.Get_User_Folder_Path(user_id);
+                string folder_path = _folder_service.Get_User_Folder_Path(user_id);
                 string file_path = System.IO.Path.Combine(folder_path, shoppingList.Id + ".json");
                 string list_as_string = JsonConvert.SerializeObject(shoppingList);
 
@@ -87,7 +89,7 @@ namespace ShoppingListServer.Logic
         {
             try
             {
-                string file_path = System.IO.Path.Combine(Folder.Get_User_Folder_Path(user_id),
+                string file_path = System.IO.Path.Combine(_folder_service.Get_User_Folder_Path(user_id),
                                                                         shoppingList_id + ".json");
 
                 if (File.Exists(file_path))

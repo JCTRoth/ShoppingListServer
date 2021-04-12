@@ -7,6 +7,7 @@ using ShoppingListServer.Services;
 using ShoppingListServer.Models;
 using ShoppingListServer.Logic;
 using ShoppingListServer.Database;
+using ShoppingListServer.Models.Commands;
 using ShoppingListServer.Models.ShoppingData;
 using ShoppingListServer.Exceptions;
 
@@ -26,15 +27,6 @@ namespace ShoppingListServer.Controllers
             _user_access = new User_Access();
         }
 
-        // Returns a List ID to the App
-        // The App can than Upload a new List with this UID
-        [Authorize(Roles = Role.User)]
-        [HttpGet("id")]
-        public IActionResult GetID()
-        {
-            return Ok(_shoppingService.GetID());
-        }
-
         [Authorize(Roles = Role.User)]
         [HttpGet("list/{syncID}")]
         public IActionResult GetList(string syncID)
@@ -47,7 +39,6 @@ namespace ShoppingListServer.Controllers
                 return BadRequest(new { message = "Not Found" });
         }
 
-        // [AllowAnonymous] // TO DO Change to restricted
         [Authorize(Roles = Role.User)]
         [HttpPost("list")]
         public IActionResult AddList([FromBody] object shoppingList_json_object)
@@ -68,7 +59,6 @@ namespace ShoppingListServer.Controllers
         {
             string userID = HttpContext.User.Identity.Name;
             bool deleted = _shoppingService.DeleteList(userID, del_syncID);
-
             if (deleted)
                 return Ok();
             else
