@@ -8,6 +8,8 @@ using ShoppingListServer.Models;
 using ShoppingListServer.Logic;
 using ShoppingListServer.Database;
 using ShoppingListServer.Models.Commands;
+using ShoppingListServer.Models.ShoppingData;
+using ShoppingListServer.Exceptions;
 
 namespace ShoppingListServer.Controllers
 {
@@ -29,54 +31,25 @@ namespace ShoppingListServer.Controllers
         [HttpGet("list/{syncID}")]
         public IActionResult GetList(string syncID)
         {
-            try
-            {
-                string userID = HttpContext.User.Identity.Name;
-                Result result = _shoppingService.GetList(userID, syncID);
-
-                if (result.WasFound == true)
-                {
-                    return Ok(result.ReturnValue);
-                }
-
+            string userID = HttpContext.User.Identity.Name;
+            ShoppingList list = _shoppingService.GetList(userID, syncID);
+            if (list != null)
+                return Ok(list);
+            else
                 return BadRequest(new { message = "Not Found" });
-            }
-            catch
-            {
-                Console.Error.WriteLine("GetList " + HttpContext.Request.Body.ToString());
-                return BadRequest(new { message = "JSON Error" });
-            }
         }
 
         [Authorize(Roles = Role.User)]
         [HttpPost("list")]
         public IActionResult AddList([FromBody] object shoppingList_json_object)
         {
-            try
-            {
-                // Convert JSON to ShoppingList Object
-                ShoppingList new_list_item = JsonConvert.DeserializeObject<ShoppingList>(shoppingList_json_object.ToString());
+            ShoppingList new_list_item = JsonConvert.DeserializeObject<ShoppingList>(shoppingList_json_object.ToString());
+            bool added = _shoppingService.AddList(new_list_item, User.Identity.Name);
 
-                // Don't allow other users to create a shopping list for other users
-                new_list_item.OwnerID = User.Identity.Name;
-
-                // Add to list of shoppingLists
-                Result was_added = _shoppingService.AddList(new_list_item);
-
-                if (was_added.WasFound)
-                {
-                    // Return SyncId of List
-                    return Ok(was_added.ReturnValue);
-                }
-
-                // already in List
-                return BadRequest(new { message = "List was added before" });
-            }
-            catch (Exception ex)
-            {
-                Console.Error.WriteLine("AddList " + ex);
-                return BadRequest(new { message = "JSON Error" });
-            }
+            if (added)
+                return Ok(new_list_item);
+            else
+                return BadRequest("Adding failed. List already exists.");
 
         }
 
@@ -85,108 +58,48 @@ namespace ShoppingListServer.Controllers
         public IActionResult DeleteList([FromBody] string del_syncID)
         {
             string userID = HttpContext.User.Identity.Name;
-            Result list_result = _shoppingService.GetList(userID, del_syncID);
-
-            if (_user_access.Is_User_Allowed_To_Delete(User.Identity.Name, list_result.ReturnValue))
-            {
-                bool deleted = _shoppingService.DeleteList(userID, del_syncID);
-
-                if (deleted)
-                {
-                    return Ok();
-                }
-
-            }
+            bool deleted = _shoppingService.DeleteList(userID, del_syncID);
+            if (deleted)
+                return Ok();
             else
-            {
-                return BadRequest(new { message = "Not allowed to delete" });
-            }
-
-            return BadRequest(new { message = "JSON Error - Not Deleted" });
+                return BadRequest(new { message = "Deleting of list failed. List is already removed." });
         }
 
         //
         // TODO ADDITEM IS MISSING
         //
 
-        [AllowAnonymous] // TODO Change to restricted
-        // [Authorize(Roles = Role.User)]
+        [Authorize(Roles = Role.User)]
         [HttpPatch("listupdate")]
         public IActionResult Update_Item_In_List([FromBody] object update_request_json)
         {
-            try
-            {
+            Update_Item updatelist_command = JsonConvert.DeserializeObject<Update_Item>(update_request_json.ToString());
+            bool ok = _shoppingService.Update_Item_In_List(
+                updatelist_command.OldItemName,
+                updatelist_command.NewItem,
+                User.Identity.Name,
+                updatelist_command.ShoppingListId);
 
-                // Convert JSON to ShoppingList Object
-                Update_Item updatelist_command = JsonConvert.DeserializeObject<Update_Item>(update_request_json.ToString());
-
-                Result result = _shoppingService.GetList(User.Identity.Name, updatelist_command.SyncID);
-
-                if (result.WasFound)
-                {
-                    if (_user_access.Is_User_Allowed_To_Edit(User.Identity.Name, result.ReturnValue))
-                    {
-                        // Add to list of shoppingLists
-                        bool updated = _shoppingService.Update_Item_In_List(updatelist_command.OldItemName,
-                                                                            updatelist_command.NewItem,
-                                                                            result.ReturnValue);
-
-                        if (!updated)
-                        {
-                            // already in List
-                            return BadRequest(new { message = "List not updated " + update_request_json.ToString() });
-                        }
-
-                        return Ok();
-                    }
-
-                }
-
-                return BadRequest(new { message = "List not found" });
-            }
-            catch (Exception ex)
-            {
-                Console.Error.WriteLine("Update_Item_In_List " + ex);
-                return BadRequest(new { message = "JSON Error" });
-            }
+            if (ok)
+                return Ok();
+            else
+                return BadRequest("Update of item failed. Item not found.");
         }
 
         [Authorize(Roles = Role.User)]
-        [HttpDelete("listupdate")]
+        [HttpDelete("listremove")]
         public IActionResult Remove_Item_In_List([FromBody] object update_request_json)
         {
-            try
-            {
-                // Convert JSON to ShoppingList Object
-                Remove_Item updatelist_command = JsonConvert.DeserializeObject<Remove_Item>(update_request_json.ToString());
+            Remove_Item removeitem_command = JsonConvert.DeserializeObject<Remove_Item>(update_request_json.ToString());   
+            bool ok = _shoppingService.Remove_Item_In_List(
+                removeitem_command.ItemName,
+                User.Identity.Name,
+                removeitem_command.ShoppingListId);
 
-                Result result = _shoppingService.GetList(User.Identity.Name, updatelist_command.SyncID);
-
-                if (result.WasFound)
-                {
-                    if (_user_access.Is_User_Allowed_To_Edit(User.Identity.Name, result.ReturnValue))
-                    {
-                        // Add to list of shoppingLists
-                        bool updated = _shoppingService.Remove_Item_In_List(updatelist_command.ItemName, result.ReturnValue);
-
-                        if (!updated)
-                        {
-                            // already in List
-                            return BadRequest(new { message = "List not updated " + update_request_json.ToString() });
-                        }
-
-                        return Ok();
-                    }
-
-                }
-
-                return BadRequest(new { message = "List not found" });
-            }
-            catch (Exception ex)
-            {
-                Console.Error.WriteLine("Remove_Item_In_List " + ex);
-                return BadRequest(new { message = "JSON Error" });
-            }
+            if (ok)
+                return Ok();
+            else
+                return BadRequest("Remove of item failed. Item not found.");
         }
 
     }

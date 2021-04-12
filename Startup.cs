@@ -11,6 +11,9 @@ using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
 using ShoppingListServer.Database;
 using ShoppingListServer.Helpers;
 using ShoppingListServer.Services;
+using Microsoft.AspNetCore.Diagnostics;
+using Newtonsoft.Json;
+using Microsoft.AspNetCore.Http;
 
 namespace ShoppingListServer
 {
@@ -67,6 +70,7 @@ namespace ShoppingListServer
                 "database=" + appSettings.DbName + ";";
             services.AddDbContextPool<AppDb>(
                 options => options
+                    .UseLazyLoadingProxies()
                     .UseMySql(
                         connectionString,
                         new MySqlServerVersion(new Version(8, 0, 23)),
@@ -84,6 +88,19 @@ namespace ShoppingListServer
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            // All non handled exceptions in the controllers are handled by simply responding with the exceptions message.
+            // https://stackoverflow.com/a/55166404
+            // https://stackoverflow.com/a/38935583
+            app.UseExceptionHandler(c => c.Run(async context =>
+            {
+                var exceptionHandlerPathFeature = context.Features.Get<IExceptionHandlerPathFeature>();
+                var exception = exceptionHandlerPathFeature.Error;
+
+                var result = JsonConvert.SerializeObject(new { error = exception.Message });
+                context.Response.ContentType = "application/json";
+                await context.Response.WriteAsync(result);
+            }));
+
             app.UseRouting();
 
             // global cors policy

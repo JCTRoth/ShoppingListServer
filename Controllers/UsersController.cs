@@ -39,7 +39,7 @@ namespace ShoppingListServer.Controllers
         {
             User new_user = JsonConvert.DeserializeObject<User>(user_json_object.ToString());
 
-            new_user.Guid = Guid.NewGuid().ToString();
+            new_user.Id = Guid.NewGuid().ToString();
 
             // A Unique Id will be used as User Id:
             // TODO Check if entry is already registered

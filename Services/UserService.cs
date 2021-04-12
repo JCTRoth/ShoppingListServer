@@ -61,7 +61,7 @@ namespace ShoppingListServer.Services
             }
 
             // Add User to list
-            if (new Folder().Create_User_Folder(new_user.Guid))
+            if (new Folder().Create_User_Folder(new_user.Id))
             {
                 _db.Users.Add(new_user);
                 _db.SaveChanges();
@@ -117,7 +117,7 @@ namespace ShoppingListServer.Services
             {
                 Subject = new ClaimsIdentity(new Claim[] 
                 {
-                    new Claim(ClaimTypes.Name, user.Guid),
+                    new Claim(ClaimTypes.Name, user.Id),
                     new Claim(ClaimTypes.Email, user.EMail),
                     new Claim(ClaimTypes.Role, user.Role)
                 }),
@@ -140,7 +140,7 @@ namespace ShoppingListServer.Services
         // Requests without password field will have value null 
         private dynamic FindUser_ID(string id, string password)
         {
-            var user = _db.Users.SingleOrDefault(x => x.Guid == id && x.Password == password);
+            var user = _db.Users.SingleOrDefault(x => x.Id == id && x.Password == password);
 
             return user;
         }
@@ -171,7 +171,7 @@ namespace ShoppingListServer.Services
 
         public User GetById(string id) 
         {
-            var user = _db.Users.FirstOrDefault(x => x.Guid == id);
+            var user = _db.Users.FirstOrDefault(x => x.Id == id);
             return user.WithoutPassword();
         }
     }
