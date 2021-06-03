@@ -101,6 +101,9 @@ namespace ShoppingListServer
                 await context.Response.WriteAsync(result);
             }));
 
+            // Handle all other non cached exceptions
+            AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(Unhandled_Exceptions);
+
             app.UseRouting();
 
             // global cors policy
@@ -112,11 +115,18 @@ namespace ShoppingListServer
             app.UseAuthentication();
             app.UseRouting();
             app.UseAuthorization();
+            app.UseWebSockets();
+
 
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
             });
+        }
+
+        private void Unhandled_Exceptions(object sender, UnhandledExceptionEventArgs e)
+        {
+            Console.WriteLine((e.ExceptionObject as Exception).Message, "Unhandled Exception");
         }
     }
 }

@@ -12,6 +12,8 @@ namespace ShoppingListServer.Exceptions
         public ShoppingListNotFoundException(string _shoppingListId)
         {
             ShoppingListId = _shoppingListId;
+
+            Console.Error.WriteLine("ShoppingListNotFoundException " + _shoppingListId);
         }
     }
 }

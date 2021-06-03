@@ -12,6 +12,8 @@ namespace ShoppingListServer.Exceptions
         {
             Permission = _permission;
             ExpectedPermission = _expectedPermission;
+
+            Console.Error.WriteLine("NoShoppingListPermissionException ShoppingListId " + _permission.ShoppingListId + "UserId " + _permission.UserId);
         }
 
         ShoppingListPermission Permission { get; set; }
