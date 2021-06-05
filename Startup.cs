@@ -14,6 +14,7 @@ using ShoppingListServer.Services;
 using Microsoft.AspNetCore.Diagnostics;
 using Newtonsoft.Json;
 using Microsoft.AspNetCore.Http;
+using System.Net.NetworkInformation;
 
 namespace ShoppingListServer
 {
@@ -83,6 +84,14 @@ namespace ShoppingListServer
                     .EnableDetailedErrors()
             );
 
+            Console.WriteLine("Network adapter prioritization:");
+            foreach (NetworkInterface ni in NetworkInterface.GetAllNetworkInterfaces())
+            {
+                if (ni.OperationalStatus == OperationalStatus.Up)
+                {
+                    Console.WriteLine(ni.NetworkInterfaceType.ToString());
+                }
+            }
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
