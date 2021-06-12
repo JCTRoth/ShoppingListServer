@@ -5,6 +5,7 @@ using ShoppingListServer.Services;
 using ShoppingListServer.Entities;
 using Newtonsoft.Json;
 using ShoppingListServer.Models;
+using ShoppingListServer.Helpers;
 
 namespace ShoppingListServer.Controllers
 {
@@ -18,6 +19,13 @@ namespace ShoppingListServer.Controllers
         public UsersController(IUserService userService)
         {
             _userService = userService;
+        }
+
+        [AllowAnonymous]
+        [HttpHead("test")]
+        public ActionResult TestMe()
+        {
+            return Ok();
         }
 
         [AllowAnonymous]
@@ -80,7 +88,7 @@ namespace ShoppingListServer.Controllers
             if (user == null)
                 return NotFound();
 
-            return Ok(user);
+            return Ok(user.WithoutPassword());
         }
     }
 }

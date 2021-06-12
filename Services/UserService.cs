@@ -23,6 +23,8 @@ namespace ShoppingListServer.Services
         IEnumerable<User> GetAll();
 
         User GetById(string id);
+
+        User GetByEMail(string email);
     }
 
     public class UserService : IUserService
@@ -71,10 +73,12 @@ namespace ShoppingListServer.Services
             return false;
         }
 
+        // Authenticates the user.
+        // If the given id is null or "", uses the email to identify the user.
         public Result Authenticate(string id, string email, string password)
         {
             Result result = new Result();
-            User user;
+            User user = null;
 
             // Valid
             // Id = "123", Email == null, password == null
@@ -84,21 +88,13 @@ namespace ShoppingListServer.Services
             // Email is set but no pw
             //
 
-            if (! string.IsNullOrEmpty(id))
+            if (!string.IsNullOrEmpty(id))
             {
                 user = FindUser_ID(id, password);
             }
-            else
+            else if (!string.IsNullOrEmpty(email))
             {
-                if (! string.IsNullOrEmpty(email))
-                {
-                    return FindUser_EMail(email, password);
-                }
-                else
-                {
-                    result.WasFound = false;
-                    return result;
-                }
+                user = FindUser_EMail(email, password);
             }
 
             // return null if user not found
@@ -107,7 +103,6 @@ namespace ShoppingListServer.Services
                 result.WasFound = false;
                 return result;
             }
-
 
             // authentication successful so generate jwt token
             var tokenHandler = new JwtSecurityTokenHandler();
@@ -138,30 +133,24 @@ namespace ShoppingListServer.Services
         // Returns null when user not found
         // Users without password set will have pw null
         // Requests without password field will have value null 
-        private dynamic FindUser_ID(string id, string password)
+        private User FindUser_ID(string id, string password)
         {
             var user = _db.Users.SingleOrDefault(x => x.Id == id && x.Password == password);
-
             return user;
         }
 
         // Returns null when user not found
         // Email only has to have pw in request
-        private Result FindUser_EMail(string email, string password)
+        private User FindUser_EMail(string email, string password)
         {
-            Result result = new Result();
+            User user = null;
 
-            if(! string.IsNullOrEmpty(password))
+            if (!string.IsNullOrEmpty(email) && !string.IsNullOrEmpty(password))
             {
-                result.WasFound = true;
-                result.ReturnValue = _db.Users.SingleOrDefault(x => x.EMail == email && x.Password == password);
-                return result;
+                user = _db.Users.SingleOrDefault(x => x.EMail == email && x.Password == password);
+                
             }
-            else
-            {
-                result.WasFound = false;
-                return result;
-            }
+            return user;
         }
 
         public IEnumerable<User> GetAll()
@@ -172,7 +161,13 @@ namespace ShoppingListServer.Services
         public User GetById(string id) 
         {
             var user = _db.Users.FirstOrDefault(x => x.Id == id);
-            return user.WithoutPassword();
+            return user;
+        }
+
+        public User GetByEMail(string email)
+        {
+            User user = _db.Users.FirstOrDefault(x => x.EMail.Equals(email));
+            return user;
         }
     }
 }

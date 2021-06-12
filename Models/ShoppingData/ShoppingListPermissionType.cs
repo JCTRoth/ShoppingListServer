@@ -10,11 +10,12 @@ namespace ShoppingListServer.Models.ShoppingData
     [Flags]
     public enum ShoppingListPermissionType
     {
+        Undefined = 0,
         Read = 1 << 0,
-        Write = 1 << 1,
+        Write = 1 << 1 | Read,
         Delete = 1 << 2,
         ModifyAccess = 1 << 3,
-        ReadWrite = Read | Write,
-        All = ReadWrite | Delete | ModifyAccess
+        All = Write | Delete | ModifyAccess
     }
+
 }

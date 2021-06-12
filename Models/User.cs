@@ -27,5 +27,20 @@ namespace ShoppingListServer.Entities
         [JsonIgnore, System.Text.Json.Serialization.JsonIgnore]
         public virtual List<ShoppingListPermission> ShoppingListPermissions { get; set; } = new List<ShoppingListPermission>();
 
+        public User Copy()
+        {
+            return new User
+            {
+                Id = Id == null ? null : new string(Id),
+                EMail = EMail == null ? null : new string(EMail),
+                FirstName = FirstName == null ? null : new string(FirstName),
+                LastName = LastName == null ? null : new string(LastName),
+                Username = Username == null ? null : new string(Username),
+                Password = Password == null ? null : new string(Password),
+                Role = Role == null ? null : new string(Role),
+                Token = Token == null ? null : new string(Token),
+                ShoppingListPermissions = new List<ShoppingListPermission>(ShoppingListPermissions)
+            };
+        }
     }
 }

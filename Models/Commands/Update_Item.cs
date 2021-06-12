@@ -7,6 +7,6 @@
 
         public string OldItemName { get; set; }
 
-        public GenericProduct NewItem { get; set; }
+        public GenericItem NewItem { get; set; }
     }
 }
