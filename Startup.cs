@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text;
+using System.Net.NetworkInformation;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.IdentityModel.Tokens;
@@ -7,14 +8,16 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.AspNetCore.Http;
 using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
+using Newtonsoft.Json;
 using ShoppingListServer.Database;
 using ShoppingListServer.Helpers;
 using ShoppingListServer.Services;
-using Microsoft.AspNetCore.Diagnostics;
-using Newtonsoft.Json;
-using Microsoft.AspNetCore.Http;
-using System.Net.NetworkInformation;
+using ShoppingListServer.Controllers;
+using System.Threading.Tasks;
 
 namespace ShoppingListServer
 {
@@ -33,6 +36,10 @@ namespace ShoppingListServer
             services.AddCors();
             services.AddControllers();
 
+            // Replaced asp .net core 2.0 AddMvc()
+            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
+            services.AddControllersWithViews();
+
             // configure strongly typed settings objects
             var appSettingsSection = Configuration.GetSection("AppSettings");
             services.Configure<AppSettings>(appSettingsSection);
@@ -45,18 +52,41 @@ namespace ShoppingListServer
                 x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                 x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
             })
-            .AddJwtBearer(x =>
+            .AddJwtBearer(options =>
             {
-                x.RequireHttpsMetadata = false;
-                x.SaveToken = true;
-                x.TokenValidationParameters = new TokenValidationParameters
+                options.RequireHttpsMetadata = false;
+                options.SaveToken = true;
+                options.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateIssuerSigningKey = true,
                     IssuerSigningKey = new SymmetricSecurityKey(key),
                     ValidateIssuer = false,
                     ValidateAudience = false
                 };
+
+                options.Events = new JwtBearerEvents
+                {
+                    OnMessageReceived = context =>
+                    {
+                        var accessToken = context.Request.Query["access_token"];
+
+                        // If the request is on update hub
+                        // TO DO get rout from config
+                        var path = context.HttpContext.Request.Path;
+                        if (!string.IsNullOrEmpty(accessToken) &&
+                            (path.StartsWithSegments("/shoppingserver/update")))
+                        {
+                            // Read the token out of the query string
+                            context.Token = accessToken;
+                        }
+                        return Task.CompletedTask;
+                    }
+                };
+
             });
+
+            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
+            services.AddSignalR();
 
             // configure DI for application services
             services.AddScoped<IUserService, UserService>();
@@ -124,13 +154,31 @@ namespace ShoppingListServer
             app.UseAuthentication();
             app.UseRouting();
             app.UseAuthorization();
-            app.UseWebSockets();
 
+            // Server accessibility on browser routs
+            app.UseStaticFiles();
+
+#if DEBUG
+            app.UseDeveloperExceptionPage();
+#else
+            app.UseHsts();
+            app.UseHttpsRedirection();
+#endif
+
+            // SignalR/Websockets
+
+            app.UseSignalR(routes =>
+            {
+                // TO DO Get rout from conig
+                routes.MapHub<Update_Hub>("/shoppingserver/update");
+            });
 
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
             });
+
+
         }
 
         private void Unhandled_Exceptions(object sender, UnhandledExceptionEventArgs e)

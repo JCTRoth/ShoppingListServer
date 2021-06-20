@@ -22,13 +22,6 @@ namespace ShoppingListServer.Controllers
         }
 
         [AllowAnonymous]
-        [HttpHead("test")]
-        public ActionResult TestMe()
-        {
-            return Ok();
-        }
-
-        [AllowAnonymous]
         [HttpPost("authenticate")]
         public IActionResult Authenticate([FromBody]Authenticate model)
         {
