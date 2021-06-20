@@ -15,9 +15,9 @@ https://github.com/danielroth1/ShoppingListApp
 docker container run -d --name 'shopping-list' -p 5678:5678 sha256:6ecc3a5e1f501e6c2ea374176fd3e9f469eebae8ed6355818cd1393eb8fdd994
 ```
 
-***DB Setup***
 
-dotnet tool install --global dotnet-ef
-dotnet add package Microsoft.EntityFrameworkCore.Design
-dotnet ef migrations add InitialCreate
+## Database
+To setup the database, install mysql and run the following:
+```
 dotnet ef database update
+```

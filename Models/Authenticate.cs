@@ -1,5 +1,6 @@
 namespace ShoppingListServer.Entities
 {
+    // Provide either email or username together with password.
     public class Authenticate
     {
         public string Id { get; set; }

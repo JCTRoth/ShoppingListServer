@@ -6,6 +6,7 @@ using ShoppingListServer.Entities;
 using Newtonsoft.Json;
 using ShoppingListServer.Models;
 using ShoppingListServer.Helpers;
+using ShoppingListServer.Models.Commands;
 
 namespace ShoppingListServer.Controllers
 {
@@ -45,13 +46,18 @@ namespace ShoppingListServer.Controllers
         [HttpPost("register")]
         public IActionResult Register([FromBody] object user_json_object)
         {
-            User new_user = JsonConvert.DeserializeObject<User>(user_json_object.ToString());
+            RegisterRequest registerRequest = JsonConvert.DeserializeObject<RegisterRequest>(user_json_object.ToString());
 
-            new_user.Id = Guid.NewGuid().ToString();
+            User new_user = new User
+            {
+                Id = Guid.NewGuid().ToString(),
+                EMail = registerRequest.EMail,
+                FirstName = registerRequest.FirstName,
+                LastName = registerRequest.LastName,
+                Username = registerRequest.Username
+            };
 
-            // A Unique Id will be used as User Id:
-            // TODO Check if entry is already registered
-            if (_userService.AddUser(new_user))
+            if (_userService.AddUser(new_user, registerRequest.Password))
             {
                 return Ok(new_user);
             }
