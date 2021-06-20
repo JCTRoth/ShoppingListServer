@@ -22,7 +22,8 @@ namespace ShoppingListServer.Helpers
                 return null;
 
             user = user.Copy();
-            user.Password = null;
+            user.PasswordHash = null;
+            user.Salt = null;
             return user;
         }
     }

@@ -15,7 +15,11 @@ namespace ShoppingListServer.Entities
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public string Username { get; set; }
-        public string Password { get; set; }
+        // Hashed Password
+        public string PasswordHash { get; set; }
+        // Salt: part of the hashing algorithm.
+        [MaxLength(16)]
+        public byte[] Salt { get; set; }
 
         [JsonIgnore, System.Text.Json.Serialization.JsonIgnore]
         // Allow only users to register via the API
@@ -29,6 +33,8 @@ namespace ShoppingListServer.Entities
 
         public User Copy()
         {
+            byte[] saltCopy = new byte[Salt.Length];
+            System.Array.Copy(Salt, 0, saltCopy, 0, Salt.Length);
             return new User
             {
                 Id = Id == null ? null : new string(Id),
@@ -36,7 +42,8 @@ namespace ShoppingListServer.Entities
                 FirstName = FirstName == null ? null : new string(FirstName),
                 LastName = LastName == null ? null : new string(LastName),
                 Username = Username == null ? null : new string(Username),
-                Password = Password == null ? null : new string(Password),
+                PasswordHash = Username == null ? null : new string(Username),
+                Salt = saltCopy,
                 Role = Role == null ? null : new string(Role),
                 Token = Token == null ? null : new string(Token),
                 ShoppingListPermissions = new List<ShoppingListPermission>(ShoppingListPermissions)

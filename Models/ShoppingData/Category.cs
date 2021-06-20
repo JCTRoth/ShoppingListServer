@@ -7,6 +7,8 @@ namespace ShoppingListServer.Models
         // e.g. : "Category":{"Name":"Getränke"}
         public string Name { get; set; }
 
+        public string ColorHex { get; set; }
+
         public string ImagePath { get; set; }
     }
 }

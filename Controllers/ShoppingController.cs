@@ -69,7 +69,7 @@ namespace ShoppingListServer.Controllers
 
         [Authorize(Roles = Role.User)]
         [HttpDelete("list/{syncId}")]
-        public IActionResult DeleteList([FromBody] string syncId)
+        public IActionResult DeleteList(string syncId)
         {
             string userID = HttpContext.User.Identity.Name;
             bool deleted = _shoppingService.DeleteList(userID, syncId);
@@ -79,7 +79,7 @@ namespace ShoppingListServer.Controllers
                 return BadRequest(new { message = "Deleting of list failed. List is already removed." });
         }
 
-        [HttpPatch("list/{syncId}")]
+        [HttpPatch("list")]
         public IActionResult UpdateList([FromBody] object listJson)
         {
             ShoppingList listIn = JsonConvert.DeserializeObject<ShoppingList>(listJson.ToString());
