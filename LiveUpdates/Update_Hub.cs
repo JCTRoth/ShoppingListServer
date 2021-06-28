@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 
-namespace ShoppingListServer.Controllers
+namespace ShoppingListServer.LiveUpdates
 {
     [Authorize]
         public class Update_Hub : Hub
@@ -24,7 +24,5 @@ namespace ShoppingListServer.Controllers
             {
                 await Clients.User(user).SendAsync("ServerMessage", $"{Context.UserIdentifier}: {message}");
             }
-
-
-        }
+    }
 }
