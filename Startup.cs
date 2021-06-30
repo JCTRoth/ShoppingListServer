@@ -64,6 +64,8 @@ namespace ShoppingListServer
                     ValidateAudience = false
                 };
 
+                // API Key AUTH.
+                /*
                 options.Events = new JwtBearerEvents
                 {
                     OnMessageReceived = context =>
@@ -82,8 +84,8 @@ namespace ShoppingListServer
                         return Task.CompletedTask;
                     }
                 };
-
-            });
+                */
+           });
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
             services.AddSignalR();
@@ -151,7 +153,6 @@ namespace ShoppingListServer
                 .AllowAnyMethod()
                 .AllowAnyHeader());
 
-            app.UseAuthentication();
             app.UseRouting();
             app.UseAuthorization();
 
@@ -166,15 +167,9 @@ namespace ShoppingListServer
 #endif
 
             // SignalR/Websockets
-
-            app.UseSignalR(routes =>
-            {
-                // TO DO Get rout from conig
-                routes.MapHub<Update_Hub>("/shoppingserver/update");
-            });
-
             app.UseEndpoints(endpoints =>
             {
+                endpoints.MapHub<Update_Hub>("/shoppingserver/update");
                 endpoints.MapControllers();
             });
 
