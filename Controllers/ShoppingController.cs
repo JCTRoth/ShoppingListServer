@@ -11,6 +11,7 @@ using ShoppingListServer.Models.Commands;
 using ShoppingListServer.Models.ShoppingData;
 using ShoppingListServer.Exceptions;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace ShoppingListServer.Controllers
 {
@@ -56,10 +57,10 @@ namespace ShoppingListServer.Controllers
 
         [Authorize(Roles = Role.User)]
         [HttpPost("list")]
-        public IActionResult AddList([FromBody] object shoppingList_json_object)
+        public async Task<IActionResult> AddList([FromBody] object shoppingList_json_object)
         {
             ShoppingList new_list_item = JsonConvert.DeserializeObject<ShoppingList>(shoppingList_json_object.ToString());
-            bool added = _shoppingService.AddList(new_list_item, User.Identity.Name);
+            bool added = await _shoppingService.AddList(new_list_item, User.Identity.Name);
 
             if (added)
                 return Ok(new_list_item);
@@ -69,10 +70,10 @@ namespace ShoppingListServer.Controllers
 
         [Authorize(Roles = Role.User)]
         [HttpDelete("list/{syncId}")]
-        public IActionResult DeleteList(string syncId)
+        public async Task<IActionResult> DeleteList(string syncId)
         {
             string userID = HttpContext.User.Identity.Name;
-            bool deleted = _shoppingService.DeleteList(userID, syncId);
+            bool deleted = await _shoppingService.DeleteList(userID, syncId);
             if (deleted)
                 return Ok();
             else
@@ -80,10 +81,10 @@ namespace ShoppingListServer.Controllers
         }
 
         [HttpPatch("list")]
-        public IActionResult UpdateList([FromBody] object listJson)
+        public async Task<IActionResult> UpdateList([FromBody] object listJson)
         {
             ShoppingList listIn = JsonConvert.DeserializeObject<ShoppingList>(listJson.ToString());
-            bool success = _shoppingService.UpdateList(listIn, User.Identity.Name);
+            bool success = await _shoppingService.UpdateList(listIn, User.Identity.Name);
             if (success)
                 return Ok();
             else
@@ -96,10 +97,10 @@ namespace ShoppingListServer.Controllers
 
         [Authorize(Roles = Role.User)]
         [HttpPatch("item")]
-        public IActionResult Update_Item_In_List([FromBody] object update_request_json)
+        public async Task<IActionResult> Update_Item_In_List([FromBody] object update_request_json)
         {
             Update_Item updatelist_command = JsonConvert.DeserializeObject<Update_Item>(update_request_json.ToString());
-            bool ok = _shoppingService.Update_Item_In_List(
+            bool ok = await _shoppingService.Update_Item_In_List(
                 updatelist_command.OldItemName,
                 updatelist_command.NewItem,
                 User.Identity.Name,
@@ -113,10 +114,10 @@ namespace ShoppingListServer.Controllers
 
         [Authorize(Roles = Role.User)]
         [HttpDelete("item")]
-        public IActionResult Remove_Item_In_List([FromBody] object update_request_json)
+        public async Task<IActionResult> Remove_Item_In_List([FromBody] object update_request_json)
         {
             Remove_Item removeitem_command = JsonConvert.DeserializeObject<Remove_Item>(update_request_json.ToString());
-            bool ok = _shoppingService.Remove_Item_In_List(
+            bool ok = await _shoppingService.Remove_Item_In_List(
                 removeitem_command.ItemName,
                 User.Identity.Name,
                 removeitem_command.ShoppingListId);
@@ -129,10 +130,10 @@ namespace ShoppingListServer.Controllers
 
         [Authorize(Roles = Role.User)]
         [HttpPatch("product")]
-        public IActionResult Update_Product_In_List([FromBody] object update_request_json)
+        public async Task<IActionResult> Update_Product_In_List([FromBody] object update_request_json)
         {
             Update_Product updatelist_command = JsonConvert.DeserializeObject<Update_Product>(update_request_json.ToString());
-            bool ok = _shoppingService.Add_Or_Update_Product_In_List(
+            bool ok = await _shoppingService.Add_Or_Update_Product_In_List(
                 updatelist_command.NewProduct,
                 User.Identity.Name,
                 updatelist_command.ShoppingListId);
@@ -211,7 +212,7 @@ namespace ShoppingListServer.Controllers
         // \param listPermission - Tuple<string, string, string> => TargetUserEMail, ShoppingListId, PermissionType
         [Authorize(Roles = Role.User)]
         [HttpPut("listpermission")]
-        public IActionResult AddOrUpdateListPermission([FromBody] object listPermission)
+        public async Task<IActionResult> AddOrUpdateListPermission([FromBody] object listPermission)
         {
             Tuple<string, string, string> tupel =
                 JsonConvert.DeserializeObject<Tuple<string, string, string>>(listPermission.ToString());
@@ -226,7 +227,7 @@ namespace ShoppingListServer.Controllers
                 ShoppingListPermissionType permission =
                     (ShoppingListPermissionType)Enum.Parse(typeof(ShoppingListPermissionType), tupel.Item3, true);
 
-                bool success = _shoppingService.AddOrUpdateListPermission(thisUserId, targetUserId, shoppingListId, permission);
+                bool success = await _shoppingService.AddOrUpdateListPermission(thisUserId, targetUserId, shoppingListId, permission);
                 if (success)
                     return Ok();
             }
@@ -235,11 +236,11 @@ namespace ShoppingListServer.Controllers
 
         [Authorize(Roles = Role.User)]
         [HttpDelete("listpermission/{listId}/{userEMail}")]
-        public IActionResult RemoveListPermission(string listId, string userEMail)
+        public async Task<IActionResult> RemoveListPermission(string listId, string userEMail)
         {
             string thisUserId = HttpContext.User.Identity.Name;
             string targetUserId = _userService.GetByEMail(userEMail).Id;
-            bool success = _shoppingService.RemoveListPermission(thisUserId, targetUserId, listId);
+            bool success = await _shoppingService.RemoveListPermission(thisUserId, targetUserId, listId);
             if (success)
                 return Ok();
             else

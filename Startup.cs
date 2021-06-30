@@ -18,6 +18,7 @@ using ShoppingListServer.Helpers;
 using ShoppingListServer.Services;
 using ShoppingListServer.Controllers;
 using System.Threading.Tasks;
+using ShoppingListServer.LiveUpdates;
 
 namespace ShoppingListServer
 {
