@@ -15,43 +15,12 @@ using ShoppingListServer.Logic;
 using ShoppingListServer.Models;
 using ShoppingListServer.Models.Commands;
 using ShoppingListServer.Models.ShoppingData;
+using ShoppingListServer.Services.Interfaces;
 
 namespace ShoppingListServer.Services
 {
-    public interface IShoppingService
-    {
-        string GetID();
-        ShoppingList GetList(string userId, string shoppingListId);
-        List<ShoppingListWithPermissionDTO> GetLists(string userId);
-        // Return all lists that the user has the given permission for.
-        List<ShoppingList> GetLists(string userId, ShoppingListPermissionType permission);
-        Task<bool> AddList(ShoppingList list, string userID);
-        Task<bool> UpdateList(ShoppingList list, string userId);
-        Task<bool> DeleteList(string shoppingListId, string userId);
-        Task<bool> Update_Item_In_List(string itemNameOld, GenericItem itemNew, string userId, string shoppingListId);
-        Task<bool> Add_Or_Update_Product_In_List(GenericProduct productNew, string userId, string shoppingListId);
-        Task<bool> Remove_Item_In_List(string itemName, string userId, string shoppingListId);
 
-        // Returns all permissions that are assigned to a list.
-        // \return List<Tuple<UserId, ShoppingListPermissionType>>
-        List<Tuple<string, ShoppingListPermissionType>> GetListPermissions(string shoppingListId);
-        
-        // Returns all list permissions of a certain user. These are all lists that a user can at least read.
-        // \return List<Tuple<ShoppingListId, ShoppingListPermissionType>>
-        List<Tuple<string, ShoppingListPermissionType>> GetUserListPermissions(string userId);
-        
-        // Return permission that the given user has for the given list
-        // Exception: If this user has no read access to the list.
-        ShoppingListPermissionType GetUserListPermission(string shoppingListId, string thisUserId, string userId);
-        
-        Task<bool> AddOrUpdateListPermission(string thisUserId, string targetUserId, string shoppingListId, ShoppingListPermissionType permission);
-        // Remove the permission of a user from a shopping list. Doesn't work if the user is the owner.
-        
-        Task<bool> RemoveListPermission(string thisUserId, string targetUserId, string shoppingListId);
-
-    }
-
-    public class ShoppingService : IShoppingService
+    public class ShoppingService : IShoppingService //, IShoppingHub
     {
         private readonly IHubContext<Update_Hub> _hubContext;
         private readonly AppSettings _appSettings;
@@ -447,8 +416,13 @@ namespace ShoppingListServer.Services
             }
             return false;
         }
-        
-        private async Task SendListAdded(ShoppingList list, ShoppingListPermissionType permission)
+
+        /*
+         * 
+         * SINGAL R LIVE UPDATES
+         * 
+        */
+        async Task SendListAdded(ShoppingList list, ShoppingListPermissionType permission)
         {
             string listJson = JsonConvert.SerializeObject(list);
             List<string> users = GetUsersWithPermissions(list.SyncId, permission);
@@ -457,61 +431,98 @@ namespace ShoppingListServer.Services
 
         // Send the given list to all users that have the given permission on that list, e.g.
         // if permission == Read then it's send to all users that have read permission on that list.
-        private async Task SendListUpdated(ShoppingList list, ShoppingListPermissionType permission)
+        async Task SendListUpdated(ShoppingList list, ShoppingListPermissionType permission)
         {
             string listJson = JsonConvert.SerializeObject(list);
             List<string> users = GetUsersWithPermissions(list.SyncId, ShoppingListPermissionType.Read);
             await _hubContext.Clients.Users(users).SendAsync("ListUpdated", listJson);
         }
 
-        private async Task SendListRemoved(string listSyncId, ShoppingListPermissionType permission)
+        async Task SendListRemoved(string listSyncId, ShoppingListPermissionType permission)
         {
             List<string> users = GetUsersWithPermissions(listSyncId, ShoppingListPermissionType.Read);
             await _hubContext.Clients.Users(users).SendAsync("ListRemoved", listSyncId);
         }
 
-        private async Task SendListRemoved(string listSyncId, string userId)
+        async Task SendListRemoved(string listSyncId, string userId)
         {
             await _hubContext.Clients.Users(userId).SendAsync("ListRemoved", listSyncId);
         }
 
         // Inform the given user that its permission for the given list changed.
-        private async Task SendListPermissionChanged(
+        async Task<bool> SendListPermissionChanged(
             string listSyncId,
             string userId,
             ShoppingListPermissionType permission)
         {
-            await _hubContext.Clients.Users(userId).SendAsync("ListPermissionChanged", listSyncId, permission);
+            try
+            {
+                await _hubContext.Clients.Users(userId).SendAsync("ListPermissionChanged", listSyncId, permission);
+                return true;
+            }
+            catch(Exception ex)
+            {
+                Console.Error.WriteLine("SendListPermissionChanged {0}", ex);
+                return false;
+            }
         }
 
-        private async Task SendItemNameChanged(
+        async Task<bool> SendItemNameChanged(
             string newItemName,
             string oldItemName,
             string listSyncId,
             ShoppingListPermissionType permission)
         {
-            List<string> users = GetUsersWithPermissions(listSyncId, permission);
-            await _hubContext.Clients.Users(users).SendAsync("ItemNameChanged", listSyncId, newItemName, oldItemName);
+            try
+            {
+                List<string> users = GetUsersWithPermissions(listSyncId, permission);
+                await _hubContext.Clients.Users(users).SendAsync("ItemNameChanged", listSyncId, newItemName, oldItemName);
+                return true;
+            }
+            catch(Exception ex)
+            {
+                Console.Error.WriteLine("SendItemNameChanged {0}", ex);
+                return false;
+            }
         }
 
-        private async Task SendItemAddedOrUpdated(
+        async Task<bool> SendItemAddedOrUpdated(
             GenericItem item,
             string listSyncId,
             ShoppingListPermissionType permission)
         {
-            string itemJson = JsonConvert.SerializeObject(item);
-            List<string> users = GetUsersWithPermissions(listSyncId, permission);
-            await _hubContext.Clients.Users(users).SendAsync("ItemAddedOrUpdated", listSyncId, itemJson);
+            try
+            {
+                string itemJson = JsonConvert.SerializeObject(item);
+                List<string> users = GetUsersWithPermissions(listSyncId, permission);
+                await _hubContext.Clients.Users(users).SendAsync("ItemAddedOrUpdated", listSyncId, itemJson);
+                return true;
+            }
+            catch(Exception ex)
+            {
+                Console.Error.WriteLine("SendItemAddedOrUpdated {0}", ex);
+                return false;
+            }
         }
 
-        private async Task SendProductAddedOrUpdated(
+         async Task<bool> SendProductAddedOrUpdated(
             GenericProduct product,
             string listSyncId,
             ShoppingListPermissionType permission)
         {
-            string productJson = JsonConvert.SerializeObject(product);
-            List<string> users = GetUsersWithPermissions(listSyncId, permission);
-            await _hubContext.Clients.Users(users).SendAsync("ProductAddedOrUpdated", listSyncId, productJson);
+            try
+            {
+                string productJson = JsonConvert.SerializeObject(product);
+                List<string> users = GetUsersWithPermissions(listSyncId, permission);
+                await _hubContext.Clients.Users(users).SendAsync("ProductAddedOrUpdated", listSyncId, productJson);
+                return true;
+            }
+            catch(Exception ex)
+            {
+                Console.Error.WriteLine("SendProductAddedOrUpdatedn {0}", ex);
+                return false;
+            }
+
         }
     }
 }

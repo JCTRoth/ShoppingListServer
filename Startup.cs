@@ -19,6 +19,7 @@ using ShoppingListServer.Services;
 using ShoppingListServer.Controllers;
 using System.Threading.Tasks;
 using ShoppingListServer.LiveUpdates;
+using ShoppingListServer.Services.Interfaces;
 
 namespace ShoppingListServer
 {
@@ -92,8 +93,12 @@ namespace ShoppingListServer
             services.AddSignalR();
 
             // configure DI for application services
+            // Scoped services are created once per request.
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IShoppingService, ShoppingService>();
+            // Transient services are created each time they are requested. 
+            services.AddTransient<IShoppingHub, Update_Hub>();
+
 
             // MySql database
             // Pomelo.EntityFrameworkCore.MySql: https://github.com/PomeloFoundation/Pomelo.EntityFrameworkCore.MySql

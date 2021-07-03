@@ -1,17 +1,15 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Newtonsoft.Json;
 using ShoppingListServer.Entities;
-using ShoppingListServer.Services;
 using ShoppingListServer.Models;
 using ShoppingListServer.Logic;
-using ShoppingListServer.Database;
 using ShoppingListServer.Models.Commands;
 using ShoppingListServer.Models.ShoppingData;
-using ShoppingListServer.Exceptions;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+using ShoppingListServer.Services.Interfaces;
 
 namespace ShoppingListServer.Controllers
 {
@@ -90,10 +88,6 @@ namespace ShoppingListServer.Controllers
             else
                 return BadRequest("Update failed.");
         }
-
-        //
-        // TODO ADDITEM IS MISSING
-        //
 
         [Authorize(Roles = Role.User)]
         [HttpPatch("item")]

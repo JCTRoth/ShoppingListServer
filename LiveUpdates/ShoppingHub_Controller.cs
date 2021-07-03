@@ -2,12 +2,20 @@
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
+using ShoppingListServer.Services;
 
 namespace ShoppingListServer.LiveUpdates
 {
     [Authorize]
         public class Update_Hub : Hub
         {
+            protected ShoppingService _shoppingService;
+            
+            public Update_Hub(ShoppingService shoppingService)
+            {
+                _shoppingService = shoppingService;
+            }
+            
             public override async Task OnConnectedAsync()
             {
                 await Clients.Caller.SendAsync("ServerMessage", $"Connected to {Context.UserIdentifier}");
@@ -18,11 +26,6 @@ namespace ShoppingListServer.LiveUpdates
             {
                 await Clients.Caller.SendAsync("ServerMessage", $"Disconnected {Context.UserIdentifier}");
                 await base.OnDisconnectedAsync(exception);
-            }
-
-            public async Task SendToUser(string user, string message)
-            {
-                await Clients.User(user).SendAsync("ServerMessage", $"{Context.UserIdentifier}: {message}");
             }
     }
 }

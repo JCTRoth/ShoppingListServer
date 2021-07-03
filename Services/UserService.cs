@@ -13,22 +13,10 @@ using ShoppingListServer.Entities;
 using ShoppingListServer.Helpers;
 using ShoppingListServer.Logic;
 using ShoppingListServer.Models;
+using ShoppingListServer.Services.Interfaces;
 
 namespace ShoppingListServer.Services
 {
-    public interface IUserService
-    {
-        Result Authenticate(string id, string email, string password);
-
-        bool AddUser(User new_user, string password);
-
-        IEnumerable<User> GetAll();
-
-        User GetById(string id);
-
-        User GetByEMail(string email);
-    }
-
     public class UserService : IUserService
     {
         private readonly AppSettings _appSettings;
