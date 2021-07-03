@@ -20,13 +20,11 @@ namespace ShoppingListServer.Controllers
     {
         protected IShoppingService _shoppingService;
         protected IUserService _userService;
-        protected User_Access _user_access;
 
         public ShoppingController(IShoppingService shoppingService, IUserService userService)
         {
             _shoppingService = shoppingService;
             _userService = userService;
-            _user_access = new User_Access();
         }
 
         [Authorize(Roles = Role.User)]

@@ -9,7 +9,7 @@ namespace ShoppingListServer.Exceptions
     {
         public ItemNotFoundException(string ex_string)
         {
-            Console.WriteLine("UserNotFoundException " + ex_string);
+            Console.Error.WriteLine("UserNotFoundException " + ex_string);
         }
 
     }
