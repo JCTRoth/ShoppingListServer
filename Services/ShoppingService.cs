@@ -22,14 +22,13 @@ namespace ShoppingListServer.Services
 
     public class ShoppingService : IShoppingService //, IShoppingHub
     {
-        private readonly IHubContext<Update_Hub> _hubContext;
+        private readonly IHubContext<UpdateHub_Controller> _hubContext;
         private readonly AppSettings _appSettings;
         private readonly Json_Files _json_files;
         private readonly AppDb _db;
 
-        public ShoppingService(IHubContext<Update_Hub> hubContext, IOptions<AppSettings> appSettings, AppDb db)
+        public ShoppingService(IOptions<AppSettings> appSettings, AppDb db)
         {
-            _hubContext = hubContext;
             _appSettings = appSettings.Value;
             _json_files = new Json_Files();
             _db = db;
@@ -260,7 +259,7 @@ namespace ShoppingListServer.Services
             return query.ToList().FirstOrDefault();
         }
 
-        private List<string> GetUsersWithPermissions(string listSyncId, ShoppingListPermissionType permission)
+        public List<string> GetUsersWithPermissions(string listSyncId, ShoppingListPermissionType permission)
         {
             List<Tuple<string, ShoppingListPermissionType>> tuples = GetListPermissions(listSyncId);
             List<string> users = new List<string>();

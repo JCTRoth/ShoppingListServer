@@ -39,5 +39,7 @@ namespace ShoppingListServer.Services.Interfaces
 
             Task<bool> RemoveListPermission(string thisUserId, string targetUserId, string shoppingListId);
 
+            List<string> GetUsersWithPermissions(string listSyncId, ShoppingListPermissionType permission);
+
         }
-    }
+}

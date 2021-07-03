@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text;
+using System.Threading.Tasks;
 using System.Net.NetworkInformation;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -17,7 +18,6 @@ using ShoppingListServer.Database;
 using ShoppingListServer.Helpers;
 using ShoppingListServer.Services;
 using ShoppingListServer.Controllers;
-using System.Threading.Tasks;
 using ShoppingListServer.LiveUpdates;
 using ShoppingListServer.Services.Interfaces;
 
@@ -96,8 +96,8 @@ namespace ShoppingListServer
             // Scoped services are created once per request.
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IShoppingService, ShoppingService>();
-            // Transient services are created each time they are requested. 
-            services.AddTransient<IShoppingHub, Update_Hub>();
+            // Transient services are created each time they are requested.
+            // services.AddTransient<IShoppingHub, ShoppingHubService>();
 
 
             // MySql database
@@ -175,7 +175,7 @@ namespace ShoppingListServer
             // SignalR/Websockets
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapHub<Update_Hub>("/shoppingserver/update");
+                endpoints.MapHub<UpdateHub_Controller>("/shoppingserver/update");
                 endpoints.MapControllers();
             });
 
