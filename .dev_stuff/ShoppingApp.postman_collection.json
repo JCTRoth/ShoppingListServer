@@ -14,16 +14,6 @@
 				}
 			},
 			"request": {
-				"auth": {
-					"type": "bearer",
-					"bearer": [
-						{
-							"key": "token",
-							"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6IjIiLCJlbWFpbCI6InVzZXJAbWFpbGJhc2UuaW5mbyIsInJvbGUiOiJVc2VyIiwibmJmIjoxNjE0NDQ4NTUyLCJleHAiOjE2MTQ0NTIxNTIsImlhdCI6MTYxNDQ0ODU1Mn0.BorOmw0NCtEgoi6RLz_WtZWGbcfmaUwagz4JV9f75G8",
-							"type": "string"
-						}
-					]
-				},
 				"method": "POST",
 				"header": [
 					{
@@ -72,16 +62,6 @@
 				}
 			},
 			"request": {
-				"auth": {
-					"type": "bearer",
-					"bearer": [
-						{
-							"key": "token",
-							"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6IjIiLCJlbWFpbCI6InVzZXJAbWFpbGJhc2UuaW5mbyIsInJvbGUiOiJVc2VyIiwibmJmIjoxNjE0NDQ4NTUyLCJleHAiOjE2MTQ0NTIxNTIsImlhdCI6MTYxNDQ0ODU1Mn0.BorOmw0NCtEgoi6RLz_WtZWGbcfmaUwagz4JV9f75G8",
-							"type": "string"
-						}
-					]
-				},
 				"method": "PATCH",
 				"header": [
 					{
@@ -130,16 +110,6 @@
 				}
 			},
 			"request": {
-				"auth": {
-					"type": "bearer",
-					"bearer": [
-						{
-							"key": "token",
-							"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6IjIiLCJlbWFpbCI6InVzZXJAbWFpbGJhc2UuaW5mbyIsInJvbGUiOiJVc2VyIiwibmJmIjoxNjE0NDQ4NTUyLCJleHAiOjE2MTQ0NTIxNTIsImlhdCI6MTYxNDQ0ODU1Mn0.BorOmw0NCtEgoi6RLz_WtZWGbcfmaUwagz4JV9f75G8",
-							"type": "string"
-						}
-					]
-				},
 				"method": "GET",
 				"header": [
 					{
@@ -151,11 +121,17 @@
 						"key": "Access-Control-Allow-Origin",
 						"value": "*",
 						"type": "text"
+					},
+					{
+						"key": "",
+						"value": "",
+						"type": "text",
+						"disabled": true
 					}
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "0",
+					"raw": "",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -163,15 +139,15 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:5678/shopping/list",
+					"raw": "http://localhost:5678/shoppingserver/update",
 					"protocol": "http",
 					"host": [
 						"localhost"
 					],
 					"port": "5678",
 					"path": [
-						"shopping",
-						"list"
+						"shoppingserver",
+						"update"
 					]
 				}
 			},
@@ -183,16 +159,6 @@
 				"disabledSystemHeaders": {}
 			},
 			"request": {
-				"auth": {
-					"type": "bearer",
-					"bearer": [
-						{
-							"key": "token",
-							"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6IjIiLCJlbWFpbCI6InVzZXJAbWFpbGJhc2UuaW5mbyIsInJvbGUiOiJVc2VyIiwibmJmIjoxNjE0NDQ4NTUyLCJleHAiOjE2MTQ0NTIxNTIsImlhdCI6MTYxNDQ0ODU1Mn0.BorOmw0NCtEgoi6RLz_WtZWGbcfmaUwagz4JV9f75G8",
-							"type": "string"
-						}
-					]
-				},
 				"method": "POST",
 				"header": [
 					{
@@ -208,7 +174,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"id\": \"123123\",\r\n    \"email\": \"jonas@test.com\",\r\n    \"role\": \"admin\"\r\n}",
+					"raw": "{\r\n    \"id\": \"123123\",\r\n    \"email\": \"jonasRoth@mailbase.info\",\r\n    \"password\": \"2320202\"\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -253,7 +219,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"id\": \"2\",\r\n    \"password\":\"user\"\r\n}",
+					"raw": "{\r\n    \"id\": \"debad2e1-a99b-483b-9812-28f57d5be829\",\r\n    \"password\": \"2320202\"\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -276,52 +242,6 @@
 			"response": []
 		},
 		{
-			"name": "Get All Users",
-			"protocolProfileBehavior": {
-				"disableBodyPruning": true,
-				"disabledSystemHeaders": {
-					"accept-encoding": true
-				}
-			},
-			"request": {
-				"method": "GET",
-				"header": [
-					{
-						"key": "Accept-Encoding",
-						"value": "application/json",
-						"type": "text"
-					},
-					{
-						"key": "Access-Control-Allow-Origin",
-						"value": "*",
-						"type": "text"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\"syncID\":1}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://localhost:5678/shopping/list",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "5678",
-					"path": [
-						"shopping",
-						"list"
-					]
-				}
-			},
-			"response": []
-		},
-		{
 			"name": "Get ShoppingList ID",
 			"protocolProfileBehavior": {
 				"disableBodyPruning": true,
@@ -330,16 +250,6 @@
 				}
 			},
 			"request": {
-				"auth": {
-					"type": "bearer",
-					"bearer": [
-						{
-							"key": "token",
-							"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6IjIiLCJlbWFpbCI6InVzZXJAbWFpbGJhc2UuaW5mbyIsInJvbGUiOiJVc2VyIiwibmJmIjoxNjE0MDE0MzI0LCJleHAiOjE2MTQwMTc5MjQsImlhdCI6MTYxNDAxNDMyNH0.FCLnqI7u6XAAQVrDTf4LGrEVnuKGPW1c3HwvlkL3gkQ",
-							"type": "string"
-						}
-					]
-				},
 				"method": "GET",
 				"header": [
 					{
@@ -398,16 +308,6 @@
 				}
 			},
 			"request": {
-				"auth": {
-					"type": "bearer",
-					"bearer": [
-						{
-							"key": "token",
-							"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6IjIiLCJlbWFpbCI6InVzZXJAbWFpbGJhc2UuaW5mbyIsInJvbGUiOiJVc2VyIiwibmJmIjoxNjE0NDQ4NTUyLCJleHAiOjE2MTQ0NTIxNTIsImlhdCI6MTYxNDQ0ODU1Mn0.BorOmw0NCtEgoi6RLz_WtZWGbcfmaUwagz4JV9f75G8",
-							"type": "string"
-						}
-					]
-				},
 				"method": "DELETE",
 				"header": [
 					{
@@ -453,7 +353,7 @@
 		"bearer": [
 			{
 				"key": "token",
-				"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6IjIiLCJlbWFpbCI6InVzZXJAbWFpbGJhc2UuaW5mbyIsInJvbGUiOiJVc2VyIiwibmJmIjoxNjE2NjE4Njk3LCJleHAiOjE2MTY2MjIyOTcsImlhdCI6MTYxNjYxODY5N30.FAZlEW_D-XmQ1jik2Zb-GjL7YtWyUJywEn48Ikir_qM",
+				"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6ImRlYmFkMmUxLWE5OWItNDgzYi05ODEyLTI4ZjU3ZDViZTgyOSIsImVtYWlsIjoiam9uYXNAbWFpbGJhc2UuY29tIiwicm9sZSI6InVzZXIiLCJuYmYiOjE2MjU3NTA5ODIsImV4cCI6MTYyNTc1NDU4MiwiaWF0IjoxNjI1NzUwOTgyfQ.qTrYkqcOONRg7oHpFNe4XEU4lwhd-VY37AMdYCYGD6A",
 				"type": "string"
 			}
 		]

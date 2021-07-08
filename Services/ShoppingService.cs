@@ -27,8 +27,9 @@ namespace ShoppingListServer.Services
         private readonly Json_Files _json_files;
         private readonly AppDb _db;
 
-        public ShoppingService(IOptions<AppSettings> appSettings, AppDb db)
+        public ShoppingService(IOptions<AppSettings> appSettings, AppDb db, IHubContext<UpdateHub_Controller> hubContext)
         {
+            _hubContext = hubContext;
             _appSettings = appSettings.Value;
             _json_files = new Json_Files();
             _db = db;

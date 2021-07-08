@@ -16,14 +16,12 @@ namespace ShoppingListServer.Services
     public class ShoppingHubService : IShoppingHub
     {
         private readonly IHubContext<UpdateHub_Controller> _hubContext;
-        private readonly AppSettings _appSettings;
         private readonly IShoppingService _shoppingService;
 
-        public ShoppingHubService(IHubContext<UpdateHub_Controller> hubContext, IOptions<AppSettings> appSettings, IShoppingService shoppingService)
+        public ShoppingHubService(IHubContext<UpdateHub_Controller> hubContext, IShoppingService shoppingService)
         {
             _shoppingService = shoppingService;
             _hubContext = hubContext;
-            _appSettings = appSettings.Value;
         }
 
         /*

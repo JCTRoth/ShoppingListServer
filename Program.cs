@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 using ShoppingListServer.Logic;
@@ -15,7 +16,7 @@ namespace ShoppingListServer
         {
             // Create APIs storage folder
             new Folder().Create_Data_Storage_Folder();
-
+            Console.WriteLine("Data Storage Folder: {0}", _data_storage_folder);
             CreateHostBuilder(args).Build().Run();
         }
 

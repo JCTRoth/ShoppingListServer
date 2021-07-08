@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.DependencyInjection;
 using ShoppingListServer.Entities;
 using ShoppingListServer.Models;
 using ShoppingListServer.Models.ShoppingData;
@@ -14,9 +15,9 @@ namespace ShoppingListServer.LiveUpdates
     {
         protected ShoppingHubService _shoppingHubService;
 
-        public UpdateHub_Controller(ShoppingHubService shoppingHubService)
+        public UpdateHub_Controller()
         {
-            _shoppingHubService = shoppingHubService;
+            _shoppingHubService = (ShoppingHubService)Startup._serviceProvider.GetRequiredService(typeof(ShoppingHubService));
         }
 
         public override async Task OnConnectedAsync()

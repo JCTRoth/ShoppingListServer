@@ -17,7 +17,6 @@ using Newtonsoft.Json;
 using ShoppingListServer.Database;
 using ShoppingListServer.Helpers;
 using ShoppingListServer.Services;
-using ShoppingListServer.Controllers;
 using ShoppingListServer.LiveUpdates;
 using ShoppingListServer.Services.Interfaces;
 
@@ -31,6 +30,9 @@ namespace ShoppingListServer
         }
 
         public IConfiguration Configuration { get; }
+
+        public static ServiceProvider _serviceProvider;
+
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
@@ -67,7 +69,7 @@ namespace ShoppingListServer
                 };
 
                 // API Key AUTH.
-                /*
+                
                 options.Events = new JwtBearerEvents
                 {
                     OnMessageReceived = context =>
@@ -86,7 +88,7 @@ namespace ShoppingListServer
                         return Task.CompletedTask;
                     }
                 };
-                */
+
            });
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
@@ -99,27 +101,35 @@ namespace ShoppingListServer
             // Transient services are created each time they are requested.
             // services.AddTransient<IShoppingHub, ShoppingHubService>();
 
+            _serviceProvider = services.BuildServiceProvider();
+
 
             // MySql database
             // Pomelo.EntityFrameworkCore.MySql: https://github.com/PomeloFoundation/Pomelo.EntityFrameworkCore.MySql
             // A MySql database must be setup in the system with a name and user access specified in appsettings.json
+
             string connectionString = "server=" + appSettings.DbServerAddress + ";" +
                 "user=" + appSettings.DbUser + ";" +
-                "password=" + appSettings.DbPassword + ";" +
-                "database=" + appSettings.DbName + ";";
+                 "password=" + appSettings.DbPassword + ";" +
+                 "database=" + appSettings.DbName + ";";
+
+            ServerVersion service_version = ServerVersion.AutoDetect(connectionString);
+
             services.AddDbContextPool<AppDb>(
                 options => options
                     .UseLazyLoadingProxies()
                     .UseMySql(
                         connectionString,
-                        new MySqlServerVersion(new Version(8, 0, 23)),
+                        service_version,
                         mysqlOptions =>
                         {
-                            mysqlOptions.CharSetBehavior(CharSetBehavior.NeverAppend);
-                            //mysqlOptions.EnableRetryOnFailure(5, TimeSpan.FromSeconds(5), null);
+                            // mysqlOptions.CharSetBehavior(CharSetBehavior.NeverAppend);
+                            // mysqlOptions.EnableRetryOnFailure(5, TimeSpan.FromSeconds(5), null);
                         })
                     .EnableSensitiveDataLogging()
+#if DEBUG
                     .EnableDetailedErrors()
+#endif
             );
 
             Console.WriteLine("Network adapter prioritization:");
@@ -151,8 +161,6 @@ namespace ShoppingListServer
             // Handle all other non cached exceptions
             AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(Unhandled_Exceptions);
 
-            app.UseRouting();
-
             // global cors policy
             app.UseCors(x => x
                 .AllowAnyOrigin()
@@ -160,6 +168,7 @@ namespace ShoppingListServer
                 .AllowAnyHeader());
 
             app.UseRouting();
+            app.UseAuthentication();
             app.UseAuthorization();
 
             // Server accessibility on browser routs
