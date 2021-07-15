@@ -13,11 +13,11 @@ namespace ShoppingListServer.LiveUpdates
     [Authorize]
     public class UpdateHub_Controller : Hub
     {
-        protected ShoppingHubService _shoppingHubService;
+        protected IShoppingHub _shoppingHubService;
 
-        public UpdateHub_Controller()
+        public UpdateHub_Controller(IShoppingHub shoppingHubService)
         {
-            _shoppingHubService = (ShoppingHubService)Startup._serviceProvider.GetRequiredService(typeof(ShoppingHubService));
+            _shoppingHubService = shoppingHubService;
         }
 
         public override async Task OnConnectedAsync()
@@ -31,67 +31,6 @@ namespace ShoppingListServer.LiveUpdates
             await Clients.Caller.SendAsync("ServerMessage", $"Disconnected {Context.UserIdentifier}");
             await base.OnDisconnectedAsync(exception);
             Console.Error.WriteLine("OnDisconnectAsync {0}", exception);
-            Console.Beep();
         }
-
-        // [Authorize(Roles = Role.User)]
-        public async Task SendListAddedAsync(ShoppingList list, ShoppingListPermissionType permission)
-        {
-            await _shoppingHubService.SendListAdded(list, permission);
-        }
-
-        // [Authorize(Roles = Role.User)]
-        public async Task SendListUpdated(ShoppingList list, ShoppingListPermissionType permission)
-        {
-            await _shoppingHubService.SendListUpdated(list, permission);
-        }
-
-        // [Authorize(Roles = Role.User)]
-        public async Task SendListRemoved_Permission(string listSyncId, ShoppingListPermissionType permission)
-        {
-            await _shoppingHubService.SendListRemoved(listSyncId, permission);
-        }
-
-        // [Authorize(Roles = Role.User)]
-        public async Task SendListRemoved_UserId(string listSyncId, string userId)
-        {
-            await _shoppingHubService.SendListRemoved(listSyncId, userId);
-        }
-
-        // Inform the given user that its permission for the given list changed.
-        // [Authorize(Roles = Role.User)]
-        public async Task SendListPermissionChanged(string listSyncId, string userId, ShoppingListPermissionType permission)
-        {
-            await _shoppingHubService.SendListPermissionChanged(listSyncId, userId, permission);
-        }
-
-        // [Authorize(Roles = Role.User)]
-        public async Task SendItemNameChangedAsync(
-            string newItemName,
-            string oldItemName,
-            string listSyncId,
-            ShoppingListPermissionType permission)
-        {
-            await _shoppingHubService.SendItemNameChanged(newItemName, oldItemName, listSyncId, permission);
-        }
-        
-        // [Authorize(Roles = Role.User)]
-        public async Task SendItemAddedOrUpdatedAsync(
-            GenericItem item,
-            string listSyncId,
-            ShoppingListPermissionType permission)
-        {
-            await _shoppingHubService.SendItemAddedOrUpdated(item, listSyncId, permission);
-        }
-
-        // [Authorize(Roles = Role.User)]
-        public async Task SendProductAddedOrUpdatedAsync(
-            GenericProduct product,
-            string listSyncId,
-            ShoppingListPermissionType permission)
-        {
-            await _shoppingHubService.SendProductAddedOrUpdated(product, listSyncId, permission);
-        }
-
     }
 }

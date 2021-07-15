@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
+using ShoppingListServer.Entities;
 using ShoppingListServer.Helpers;
 using ShoppingListServer.LiveUpdates;
 using ShoppingListServer.Models;
@@ -16,11 +17,13 @@ namespace ShoppingListServer.Services
     public class ShoppingHubService : IShoppingHub
     {
         private readonly IHubContext<UpdateHub_Controller> _hubContext;
-        private readonly IShoppingService _shoppingService;
+        private readonly Lazy<IShoppingService> _shoppingService;
 
-        public ShoppingHubService(IHubContext<UpdateHub_Controller> hubContext, IShoppingService shoppingService)
+        public ShoppingHubService(
+            IServiceProvider services,
+            IHubContext<UpdateHub_Controller> hubContext)
         {
-            _shoppingService = shoppingService;
+            _shoppingService = new Lazy<IShoppingService>(() => (IShoppingService)services.GetService(typeof(IShoppingService)));
             _hubContext = hubContext;
         }
 
@@ -29,42 +32,48 @@ namespace ShoppingListServer.Services
          * SINGAL R LIVE UPDATES
          * 
         */
-        public async Task SendListAdded(ShoppingList list, ShoppingListPermissionType permission)
+        public async Task SendListAdded(User user, ShoppingList list, ShoppingListPermissionType permission)
         {
+            string userJson = JsonConvert.SerializeObject(user.WithoutPassword());
             string listJson = JsonConvert.SerializeObject(list);
-            List<string> users = _shoppingService.GetUsersWithPermissions(list.SyncId, permission);
-            await _hubContext.Clients.Users(users).SendAsync("ListAdded", listJson);
+            List<string> users = GetUsersWithPermissionsFiltered(user, list.SyncId, permission);
+            await _hubContext.Clients.Users(users).SendAsync("ListAdded", userJson, listJson);
         }
 
         // Send the given list to all users that have the given permission on that list, e.g.
         // if permission == Read then it's send to all users that have read permission on that list.
-        public async Task SendListUpdated(ShoppingList list, ShoppingListPermissionType permission)
+        public async Task SendListUpdated(User user, ShoppingList list, ShoppingListPermissionType permission)
         {
+            string userJson = JsonConvert.SerializeObject(user.WithoutPassword());
             string listJson = JsonConvert.SerializeObject(list);
-            List<string> users = _shoppingService.GetUsersWithPermissions(list.SyncId, ShoppingListPermissionType.Read);
-            await _hubContext.Clients.Users(users).SendAsync("ListUpdated", listJson);
+            List<string> users = GetUsersWithPermissionsFiltered(user, list.SyncId, permission);
+            await _hubContext.Clients.Users(users).SendAsync("ListUpdated", userJson, listJson);
         }
 
-        public async Task SendListRemoved(string listSyncId, ShoppingListPermissionType permission)
+        public async Task SendListRemoved(User user, string listSyncId, ShoppingListPermissionType permission)
         {
-            List<string> users = _shoppingService.GetUsersWithPermissions(listSyncId, ShoppingListPermissionType.Read);
-            await _hubContext.Clients.Users(users).SendAsync("ListRemoved", listSyncId);
+            string userJson = JsonConvert.SerializeObject(user.WithoutPassword());
+            List<string> users = GetUsersWithPermissionsFiltered(user, listSyncId, permission);
+            await _hubContext.Clients.Users(users).SendAsync("ListRemoved", userJson, listSyncId);
         }
 
-        public async Task SendListRemoved(string listSyncId, string userId)
+        public async Task SendListRemoved(User user, string listSyncId, string userId)
         {
-            await _hubContext.Clients.Users(userId).SendAsync("ListRemoved", listSyncId);
+            string userJson = JsonConvert.SerializeObject(user.WithoutPassword());
+            await _hubContext.Clients.Users(userId).SendAsync("ListRemoved", userJson, listSyncId);
         }
 
         // Inform the given user that its permission for the given list changed.
         public async Task<bool> SendListPermissionChanged(
+            User thisUser,
             string listSyncId,
-            string userId,
+            string targetUserId,
             ShoppingListPermissionType permission)
         {
             try
             {
-                await _hubContext.Clients.Users(userId).SendAsync("ListPermissionChanged", listSyncId, permission);
+                string userJson = JsonConvert.SerializeObject(thisUser.WithoutPassword());
+                await _hubContext.Clients.Users(targetUserId).SendAsync("ListPermissionChanged", userJson, listSyncId, permission);
                 return true;
             }
             catch(Exception ex)
@@ -75,6 +84,7 @@ namespace ShoppingListServer.Services
         }
 
         public async Task<bool> SendItemNameChanged(
+            User user,
             string newItemName,
             string oldItemName,
             string listSyncId,
@@ -82,8 +92,9 @@ namespace ShoppingListServer.Services
         {
             try
             {
-                List<string> users = _shoppingService.GetUsersWithPermissions(listSyncId, permission);
-                await _hubContext.Clients.Users(users).SendAsync("ItemNameChanged", listSyncId, newItemName, oldItemName);
+                string userJson = JsonConvert.SerializeObject(user.WithoutPassword());
+                List<string> users = GetUsersWithPermissionsFiltered(user, listSyncId, permission);
+                await _hubContext.Clients.Users(users).SendAsync("ItemNameChanged", userJson, listSyncId, newItemName, oldItemName);
                 return true;
             }
             catch(Exception ex)
@@ -94,15 +105,17 @@ namespace ShoppingListServer.Services
         }
 
         public async Task<bool> SendItemAddedOrUpdated(
+            User user,
             GenericItem item,
             string listSyncId,
             ShoppingListPermissionType permission)
         {
             try
             {
+                string userJson = JsonConvert.SerializeObject(user.WithoutPassword());
                 string itemJson = JsonConvert.SerializeObject(item);
-                List<string> users = _shoppingService.GetUsersWithPermissions(listSyncId, permission);
-                await _hubContext.Clients.Users(users).SendAsync("ItemAddedOrUpdated", listSyncId, itemJson);
+                List<string> users = GetUsersWithPermissionsFiltered(user, listSyncId, permission);
+                await _hubContext.Clients.Users(users).SendAsync("ItemAddedOrUpdated", userJson, listSyncId, itemJson);
                 return true;
             }
             catch(Exception ex)
@@ -113,15 +126,17 @@ namespace ShoppingListServer.Services
         }
 
         public async Task<bool> SendProductAddedOrUpdated(
+            User user,
             GenericProduct product,
             string listSyncId,
             ShoppingListPermissionType permission)
         {
             try
             {
+                string userJson = JsonConvert.SerializeObject(user.WithoutPassword());
                 string productJson = JsonConvert.SerializeObject(product);
-                List<string> users = _shoppingService.GetUsersWithPermissions(listSyncId, permission);
-                await _hubContext.Clients.Users(users).SendAsync("ProductAddedOrUpdated", listSyncId, productJson);
+                List<string> users = GetUsersWithPermissionsFiltered(user, listSyncId, permission);
+                await _hubContext.Clients.Users(users).SendAsync("ProductAddedOrUpdated", userJson, listSyncId, productJson);
                 return true;
             }
             catch(Exception ex)
@@ -130,6 +145,13 @@ namespace ShoppingListServer.Services
                 return false;
             }
 
+        }
+
+        private List<string> GetUsersWithPermissionsFiltered(User filteredUser, string listSyncId, ShoppingListPermissionType permission)
+        {
+            List<string> users = _shoppingService.Value.GetUsersWithPermissions(listSyncId, permission);
+            users.Remove(filteredUser.Id);
+            return users;
         }
     }
 }

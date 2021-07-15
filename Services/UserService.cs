@@ -96,7 +96,7 @@ namespace ShoppingListServer.Services
             {
                 Subject = new ClaimsIdentity(new Claim[] 
                 {
-                    new Claim(ClaimTypes.Name, user.Id),
+                    new Claim(ClaimTypes.NameIdentifier, user.Id),
                     new Claim(ClaimTypes.Email, user.EMail),
                     new Claim(ClaimTypes.Role, user.Role)
                 }),

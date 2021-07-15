@@ -22,6 +22,14 @@ namespace ShoppingListServer.Controllers
             _userService = userService;
         }
 
+        // Is used to check if the server is reachable.
+        [AllowAnonymous]
+        [HttpHead("test")]
+        public ActionResult TestMe()
+        {
+            return Ok();
+        }
+
         [AllowAnonymous]
         [HttpPost("authenticate")]
         public IActionResult Authenticate([FromBody]Authenticate model)

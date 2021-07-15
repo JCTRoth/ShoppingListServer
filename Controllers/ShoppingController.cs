@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
@@ -31,7 +32,7 @@ namespace ShoppingListServer.Controllers
         [HttpGet("list/{syncID}")]
         public IActionResult GetList(string syncID)
         {
-            string userID = HttpContext.User.Identity.Name;
+            string userID = User.FindFirstValue(ClaimTypes.NameIdentifier);
             ShoppingList list = _shoppingService.GetList(userID, syncID);
             if (list != null)
                 return Ok(list);
@@ -43,7 +44,7 @@ namespace ShoppingListServer.Controllers
         [HttpGet("lists")]
         public IActionResult GetLists()
         {
-            string userID = HttpContext.User.Identity.Name;
+            string userID = User.FindFirstValue(ClaimTypes.NameIdentifier);
             List<ShoppingList> lists = _shoppingService.GetLists(userID, ShoppingListPermissionType.Read);
             if (lists != null)
                 return Ok(lists);
@@ -56,7 +57,7 @@ namespace ShoppingListServer.Controllers
         public async Task<IActionResult> AddList([FromBody] object shoppingList_json_object)
         {
             ShoppingList new_list_item = JsonConvert.DeserializeObject<ShoppingList>(shoppingList_json_object.ToString());
-            bool added = await _shoppingService.AddList(new_list_item, User.Identity.Name);
+            bool added = await _shoppingService.AddList(new_list_item, User.FindFirstValue(ClaimTypes.NameIdentifier));
 
             if (added)
                 return Ok(new_list_item);
@@ -68,7 +69,7 @@ namespace ShoppingListServer.Controllers
         [HttpDelete("list/{syncId}")]
         public async Task<IActionResult> DeleteList(string syncId)
         {
-            string userID = HttpContext.User.Identity.Name;
+            string userID = User.FindFirstValue(ClaimTypes.NameIdentifier);
             bool deleted = await _shoppingService.DeleteList(userID, syncId);
             if (deleted)
                 return Ok();
@@ -80,7 +81,7 @@ namespace ShoppingListServer.Controllers
         public async Task<IActionResult> UpdateList([FromBody] object listJson)
         {
             ShoppingList listIn = JsonConvert.DeserializeObject<ShoppingList>(listJson.ToString());
-            bool success = await _shoppingService.UpdateList(listIn, User.Identity.Name);
+            bool success = await _shoppingService.UpdateList(listIn, User.FindFirstValue(ClaimTypes.NameIdentifier));
             if (success)
                 return Ok();
             else
@@ -95,7 +96,7 @@ namespace ShoppingListServer.Controllers
             bool ok = await _shoppingService.Update_Item_In_List(
                 updatelist_command.OldItemName,
                 updatelist_command.NewItem,
-                User.Identity.Name,
+                User.FindFirstValue(ClaimTypes.NameIdentifier),
                 updatelist_command.ShoppingListId);
 
             if (ok)
@@ -111,7 +112,7 @@ namespace ShoppingListServer.Controllers
             Remove_Item removeitem_command = JsonConvert.DeserializeObject<Remove_Item>(update_request_json.ToString());
             bool ok = await _shoppingService.Remove_Item_In_List(
                 removeitem_command.ItemName,
-                User.Identity.Name,
+                User.FindFirstValue(ClaimTypes.NameIdentifier),
                 removeitem_command.ShoppingListId);
 
             if (ok)
@@ -127,7 +128,7 @@ namespace ShoppingListServer.Controllers
             Update_Product updatelist_command = JsonConvert.DeserializeObject<Update_Product>(update_request_json.ToString());
             bool ok = await _shoppingService.Add_Or_Update_Product_In_List(
                 updatelist_command.NewProduct,
-                User.Identity.Name,
+                User.FindFirstValue(ClaimTypes.NameIdentifier),
                 updatelist_command.ShoppingListId);
 
             if (ok)
@@ -142,7 +143,7 @@ namespace ShoppingListServer.Controllers
         [HttpGet("listpermission/{listId}")]
         public IActionResult GetListPermissions(string listId)
         {
-            string userID = HttpContext.User.Identity.Name;
+            string userID = User.FindFirstValue(ClaimTypes.NameIdentifier);
             List<Tuple<string, ShoppingListPermissionType>> userPermissions = _shoppingService.GetListPermissions(listId);
             if (userPermissions != null)
             {
@@ -165,7 +166,7 @@ namespace ShoppingListServer.Controllers
         [HttpGet("listpermission")]
         public IActionResult GetUserListPermissions()
         {
-            string thisUserId = HttpContext.User.Identity.Name;
+            string thisUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             List<Tuple<string, ShoppingListPermissionType>> listPermissions =
                 _shoppingService.GetUserListPermissions(thisUserId);
 
@@ -192,7 +193,7 @@ namespace ShoppingListServer.Controllers
         [HttpGet("listpermission/{listId}/{userId}")]
         public IActionResult GetUserListPermission(string listId, string userId)
         {
-            string thisUserId = HttpContext.User.Identity.Name;
+            string thisUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             ShoppingListPermissionType permission = _shoppingService.GetUserListPermission(listId, thisUserId, userId);
             if (permission != ShoppingListPermissionType.Undefined)
                 return Ok(permission.ToString());
@@ -209,7 +210,7 @@ namespace ShoppingListServer.Controllers
             Tuple<string, string, string> tupel =
                 JsonConvert.DeserializeObject<Tuple<string, string, string>>(listPermission.ToString());
 
-            string thisUserId = HttpContext.User.Identity.Name;
+            string thisUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             string targetUserEMail = tupel.Item1;
             User user = _userService.GetByEMail(targetUserEMail);
             if (user != null)
@@ -230,7 +231,7 @@ namespace ShoppingListServer.Controllers
         [HttpDelete("listpermission/{listId}/{userEMail}")]
         public async Task<IActionResult> RemoveListPermission(string listId, string userEMail)
         {
-            string thisUserId = HttpContext.User.Identity.Name;
+            string thisUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             string targetUserId = _userService.GetByEMail(userEMail).Id;
             bool success = await _shoppingService.RemoveListPermission(thisUserId, targetUserId, listId);
             if (success)

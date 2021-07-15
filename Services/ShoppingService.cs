@@ -22,17 +22,23 @@ namespace ShoppingListServer.Services
 
     public class ShoppingService : IShoppingService //, IShoppingHub
     {
-        private readonly IHubContext<UpdateHub_Controller> _hubContext;
+        private readonly IUserService _userService;
+        private readonly IShoppingHub _hubService;
         private readonly AppSettings _appSettings;
         private readonly Json_Files _json_files;
         private readonly AppDb _db;
 
-        public ShoppingService(IOptions<AppSettings> appSettings, AppDb db, IHubContext<UpdateHub_Controller> hubContext)
+        public ShoppingService(
+            IOptions<AppSettings> appSettings,
+            AppDb db,
+            IUserService userService,
+            IShoppingHub hubService)
         {
-            _hubContext = hubContext;
-            _appSettings = appSettings.Value;
             _json_files = new Json_Files();
+            _appSettings = appSettings.Value;
             _db = db;
+            _hubService = hubService;
+            _userService = userService;
         }
 
         public string GetID()
@@ -105,7 +111,7 @@ namespace ShoppingListServer.Services
                 {
                     _db.ShoppingLists.Add(list);
                     _db.SaveChanges();
-                    await SendListAdded(list, ShoppingListPermissionType.Read);
+                    await _hubService.SendListAdded(_userService.GetById(userID), list, ShoppingListPermissionType.Read);
                     return true;
                 }
                 else
@@ -123,11 +129,17 @@ namespace ShoppingListServer.Services
             if (listEntity == null)
                 throw new ShoppingListNotFoundException(list.SyncId);
             CheckPermissionWithException(listEntity, userId, ShoppingListPermissionType.Write);
-            return await UpdateShoppingList(list);
+            bool success = UpdateShoppingList(list);
+            if (success)
+            {
+                await _hubService.SendListUpdated(_userService.GetById(userId), list, ShoppingListPermissionType.Read);
+            }
+            return success;
         }
 
         public async Task<bool> DeleteList(string shoppingListId, string userId)
         {
+            
             ShoppingList listEntity = GetShoppingListEntity(shoppingListId);
             if (listEntity == null)
                 throw new ShoppingListNotFoundException(shoppingListId);
@@ -137,19 +149,19 @@ namespace ShoppingListServer.Services
             bool success = DeleteShoppingList(shoppingListId);
             if (success)
             {
-                await SendListRemoved(shoppingListId, ShoppingListPermissionType.Read);
+                await _hubService.SendListRemoved(_userService.GetById(userId), shoppingListId, ShoppingListPermissionType.Read);
             }
             return success;
         }
 
         // Updates itemNameOld with itemNew.
         // If there is no itemNameOld, does noting.
-        public async Task<bool> Update_Item_In_List(string itemNameOld, GenericItem itemNew, string userId, string shoppingListId)
+        public async Task<bool> Update_Item_In_List(string itemNameOld, GenericItem itemNew, string thisUserId, string shoppingListId)
         {
             ShoppingList listEntity = GetShoppingListEntity(shoppingListId);
             if (listEntity == null)
                 throw new ShoppingListNotFoundException(shoppingListId);
-            CheckPermissionWithException(listEntity, userId, ShoppingListPermissionType.Write);
+            CheckPermissionWithException(listEntity, thisUserId, ShoppingListPermissionType.Write);
             ShoppingList list = LoadShoppingList(shoppingListId);
 
             bool success = false;
@@ -159,10 +171,17 @@ namespace ShoppingListServer.Services
                 if (index != -1)
                 {
                     list.ProductList[index].Item = itemNew;
-                    success = await UpdateShoppingList(list);
+                    success = UpdateShoppingList(list);
                     if (success)
                     {
-                        await SendItemAddedOrUpdated(itemNew, list.SyncId, ShoppingListPermissionType.Read);
+                        if (itemNew.Name.Equals(itemNameOld))
+                        {
+                            await _hubService.SendItemAddedOrUpdated(_userService.GetById(thisUserId), itemNew, list.SyncId, ShoppingListPermissionType.Read);
+                        }
+                        else
+                        {
+                            await _hubService.SendItemNameChanged(_userService.GetById(thisUserId), itemNew.Name, itemNameOld, list.SyncId, ShoppingListPermissionType.Read);
+                        }
                     }
                 }
             }
@@ -171,14 +190,15 @@ namespace ShoppingListServer.Services
 
         // Updates the given product. Only product information should change, nothing from the item, like the name.
         // If the product is not part of the list, it is added.
-        public async Task<bool> Add_Or_Update_Product_In_List(GenericProduct productNew, string userId, string shoppingListId)
+        public async Task<bool> Add_Or_Update_Product_In_List(GenericProduct productNew, string thisUserId, string shoppingListId)
         {
             ShoppingList listEntity = GetShoppingListEntity(shoppingListId);
             if (listEntity == null)
                 throw new ShoppingListNotFoundException(shoppingListId);
-            CheckPermissionWithException(listEntity, userId, ShoppingListPermissionType.Write);
+            CheckPermissionWithException(listEntity, thisUserId, ShoppingListPermissionType.Write);
             ShoppingList list = LoadShoppingList(shoppingListId);
 
+            bool success = false;
             if (list != null)
             {
                 int index = list.ProductList.FindIndex(prod => prod.Item.Name == productNew.Item.Name);
@@ -190,33 +210,34 @@ namespace ShoppingListServer.Services
                 {
                     list.ProductList.Add(productNew);
                 }
-                bool success = await UpdateShoppingList(list);
+                success = UpdateShoppingList(list);
                 if (success)
                 {
-                    await SendProductAddedOrUpdated(productNew, list.SyncId, ShoppingListPermissionType.Read);
+                    await _hubService.SendProductAddedOrUpdated(_userService.GetById(thisUserId), productNew, list.SyncId, ShoppingListPermissionType.Read);
                 }
             }
-            return false;
+            return success;
         }
 
-        public async Task<bool> Remove_Item_In_List(string itemName, string userId, string shoppingListId)
+        public async Task<bool> Remove_Item_In_List(string itemName, string thisUserId, string shoppingListId)
         {
             ShoppingList listEntity = GetShoppingListEntity(shoppingListId);
             if (listEntity == null)
                 throw new ShoppingListNotFoundException(shoppingListId);
-            CheckPermissionWithException(listEntity, userId, ShoppingListPermissionType.Write);
+            CheckPermissionWithException(listEntity, thisUserId, ShoppingListPermissionType.Write);
             ShoppingList list = LoadShoppingList(shoppingListId);
 
+            bool success = false;
             if (list != null)
             {
                 int index = list.ProductList.FindIndex(prod => prod.Item.Name == itemName);
                 if (index != -1)
                 {
                     list.ProductList.RemoveAt(index);
-                    bool success = await UpdateShoppingList(list);
+                    success = UpdateShoppingList(list);
                     if (success)
                     {
-                        await SendListUpdated(list, ShoppingListPermissionType.Read);
+                        await _hubService.SendListUpdated(_userService.GetById(thisUserId), list, ShoppingListPermissionType.Read);
                     }
                 }
             }
@@ -308,10 +329,14 @@ namespace ShoppingListServer.Services
                 });
             }
             _db.SaveChanges();
-            await SendListPermissionChanged(shoppingListId, targetUserId, permission);
+            await _hubService.SendListPermissionChanged(_userService.GetById(thisUserId), shoppingListId, targetUserId, permission);
             return true;
         }
 
+        // Remove the list permission of a given user.
+        // \param thisUser - the user that removes the list permission
+        // \param targetUserId - the user whoms permission is removed
+        // \param shoppingListId - the list ids permission that is changed.
         public async Task<bool> RemoveListPermission(string thisUserId, string targetUserId, string shoppingListId)
         {
             ShoppingList targetList = GetShoppingListEntity(shoppingListId);
@@ -325,16 +350,17 @@ namespace ShoppingListServer.Services
                         where perm.UserId.Equals(targetUserId) && perm.ShoppingListId.Equals(shoppingListId)
                         select new { list, perm };
             var first = query.FirstOrDefault();
+            bool success = false;
             if (first != null)
             {
                 first.list.ShoppingListPermissions.Remove(first.perm);
                 _db.SaveChanges();
 
                 // Remove the list for the user whose permission was removed.
-                await SendListRemoved(shoppingListId, targetUserId);
-                return true;
+                await _hubService.SendListRemoved(_userService.GetById(thisUserId), shoppingListId, targetUserId);
+                success = true;
             }
-            return false;
+            return success;
         }
 
         // Returns the entity of the given shopping list. This is an object that has only the fields set that are in the database.
@@ -374,11 +400,7 @@ namespace ShoppingListServer.Services
                         where perm.ShoppingListId == shoppingListId && perm.PermissionType.HasFlag(ShoppingListPermissionType.All)
                         select perm.UserId;
             var owner = query.FirstOrDefault();
-            if (owner != null)
-            {
-                return owner;
-            }
-            return null;
+            return owner;
         }
 
         // Loads the json file of the shopping list with the given id.
@@ -395,134 +417,25 @@ namespace ShoppingListServer.Services
         private bool DeleteShoppingList(string shoppingListId)
         {
             string ownerId = GetOwnerId(shoppingListId);
+            bool success = false;
             if (ownerId != null)
             {
-                return _json_files.Delete_ShoppingList(ownerId, shoppingListId);
+                success = _json_files.Delete_ShoppingList(ownerId, shoppingListId);
             }
-            return false;
+            return success;
         }
 
-        private async Task<bool> UpdateShoppingList(ShoppingList list)
+        // Stores the updated json file.
+        // \param list - the updated list
+        private bool UpdateShoppingList(ShoppingList list)
         {
             string ownerId = GetOwnerId(list.SyncId);
+            bool success = false;
             if (ownerId != null)
             {
-                bool success = _json_files.Store_ShoppingList(ownerId, list);
-                if (success)
-                {
-                    await SendListUpdated(list, ShoppingListPermissionType.Read);
-                }
-                return success;
+                success = _json_files.Store_ShoppingList(ownerId, list);
             }
-            return false;
-        }
-
-        /*
-         * 
-         * SINGAL R LIVE UPDATES
-         * 
-        */
-        async Task SendListAdded(ShoppingList list, ShoppingListPermissionType permission)
-        {
-            string listJson = JsonConvert.SerializeObject(list);
-            List<string> users = GetUsersWithPermissions(list.SyncId, permission);
-            await _hubContext.Clients.Users(users).SendAsync("ListAdded", listJson);
-        }
-
-        // Send the given list to all users that have the given permission on that list, e.g.
-        // if permission == Read then it's send to all users that have read permission on that list.
-        async Task SendListUpdated(ShoppingList list, ShoppingListPermissionType permission)
-        {
-            string listJson = JsonConvert.SerializeObject(list);
-            List<string> users = GetUsersWithPermissions(list.SyncId, ShoppingListPermissionType.Read);
-            await _hubContext.Clients.Users(users).SendAsync("ListUpdated", listJson);
-        }
-
-        async Task SendListRemoved(string listSyncId, ShoppingListPermissionType permission)
-        {
-            List<string> users = GetUsersWithPermissions(listSyncId, ShoppingListPermissionType.Read);
-            await _hubContext.Clients.Users(users).SendAsync("ListRemoved", listSyncId);
-        }
-
-        async Task SendListRemoved(string listSyncId, string userId)
-        {
-            await _hubContext.Clients.Users(userId).SendAsync("ListRemoved", listSyncId);
-        }
-
-        // Inform the given user that its permission for the given list changed.
-        async Task<bool> SendListPermissionChanged(
-            string listSyncId,
-            string userId,
-            ShoppingListPermissionType permission)
-        {
-            try
-            {
-                await _hubContext.Clients.Users(userId).SendAsync("ListPermissionChanged", listSyncId, permission);
-                return true;
-            }
-            catch(Exception ex)
-            {
-                Console.Error.WriteLine("SendListPermissionChanged {0}", ex);
-                return false;
-            }
-        }
-
-        async Task<bool> SendItemNameChanged(
-            string newItemName,
-            string oldItemName,
-            string listSyncId,
-            ShoppingListPermissionType permission)
-        {
-            try
-            {
-                List<string> users = GetUsersWithPermissions(listSyncId, permission);
-                await _hubContext.Clients.Users(users).SendAsync("ItemNameChanged", listSyncId, newItemName, oldItemName);
-                return true;
-            }
-            catch(Exception ex)
-            {
-                Console.Error.WriteLine("SendItemNameChanged {0}", ex);
-                return false;
-            }
-        }
-
-        async Task<bool> SendItemAddedOrUpdated(
-            GenericItem item,
-            string listSyncId,
-            ShoppingListPermissionType permission)
-        {
-            try
-            {
-                string itemJson = JsonConvert.SerializeObject(item);
-                List<string> users = GetUsersWithPermissions(listSyncId, permission);
-                await _hubContext.Clients.Users(users).SendAsync("ItemAddedOrUpdated", listSyncId, itemJson);
-                return true;
-            }
-            catch(Exception ex)
-            {
-                Console.Error.WriteLine("SendItemAddedOrUpdated {0}", ex);
-                return false;
-            }
-        }
-
-         async Task<bool> SendProductAddedOrUpdated(
-            GenericProduct product,
-            string listSyncId,
-            ShoppingListPermissionType permission)
-        {
-            try
-            {
-                string productJson = JsonConvert.SerializeObject(product);
-                List<string> users = GetUsersWithPermissions(listSyncId, permission);
-                await _hubContext.Clients.Users(users).SendAsync("ProductAddedOrUpdated", listSyncId, productJson);
-                return true;
-            }
-            catch(Exception ex)
-            {
-                Console.Error.WriteLine("SendProductAddedOrUpdatedn {0}", ex);
-                return false;
-            }
-
+            return success;
         }
     }
 }
